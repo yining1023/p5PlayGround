@@ -22,6 +22,8 @@
     <script src="js/javascript.js"></script>
     <script src="js/css.js"></script>
     <script src="js/htmlmixed.js"></script>
+    <script src="js/active-line.js"></script>
+    <script src="js/mark-selection.js"></script>
 
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <script src="js/p5.js" type="text/javascript"></script>
@@ -50,10 +52,13 @@
       }
       .CodeMirror{
         float: right;
+        font-size: 14px;
+        /*height: auto;*/
         height: 600px;
         width: 50%;
         border: 1px solid black;
       }
+      .styled-background { background-color: #ff7; }
     </style>
   </head>
 
@@ -76,19 +81,17 @@
     <script>
     function setup() {
       createCanvas(600, 600);
-
-      fill('rgba(0,125,255,0.6)');
       stroke('rgba(0,125,255,0.6)');
-
-      rect(63,186,38,298);
-      rect(108,187,102,40);
-      rect(210,227,40,89);
-      rect(107,317,103,40);
-      rect(251,187,128,40);
-      rect(379,227,40,90);
-      rect(250,317,130,40);
-      rect(251,79,40,147);
-      rect(251,80,146,40);   
+      fill('rgba(0,125,255,0.6)');
+      rect(63,186,38,298);
+      rect(108,187,102,40);
+      rect(210,227,40,89);
+      rect(107,317,103,40);
+      rect(251,187,128,40);
+      rect(379,227,40,90);
+      rect(250,317,130,40);
+      rect(251,79,40,147);
+      rect(251,80,146,40); 
     }
     function draw(){}
     </script>
@@ -103,7 +106,9 @@
     var delay;
     var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
       mode: 'text/html',
+      styleActiveLine: true,
       lineNumbers: true,
+      lineWrapping: true,
       extraKeys: {
         "Tab": "indentMore"
       }
@@ -116,48 +121,50 @@
       preview.write(editor.getValue());
       preview.close();
     }
-      //live coding mode
-      editor.on("change", function() {
-        console.log('code changed in the editor');
-        if(!$('input').is(':checked')){
-          console.log('off off');
-          clearTimeout(delay);
-          delay = setTimeout(updatePreview, 200);
-        }
-      });
-      // setTimeout(updatePreview, 200);
+    
+    //live coding mode
+    editor.on("change", function() {
+      //something happened here slow down the program, code changes N times = N in myShapes
+      console.log('code changed in the editor');
+      if(!$('input').is(':checked')){
+        // console.log('off off');
+        clearTimeout(delay);
+        delay = setTimeout(updatePreview, 200);
+      }
+    });
+    // setTimeout(updatePreview, 200);
 
-      //run the code in the editor for the first time
-      setTimeout(updatePreview, 200);
-      //insert or remove js files
-      var reloadOnce = false;
-      $('input').change(function () {
-        console.log('input changed');
-        if ($('input').is(':checked')) {
-          console.log('input changed and input is checked now');
-          var head = document.getElementsByTagName('head')[0];
-          //inject p5.inspector.js
-          var script = document.createElement("script");
-          script.id = "p5Inspector";
-          script.type = "text/javascript";
-          script.src = "js/p5.inspector.js"; 
-          head.insertBefore(script, head.childNodes[1]);
-          console.log("injected p5.inspector.js");
-        } 
-        else {
-          //remove js files
-          $('#p5Inspector').remove();
-          var canvas = document.getElementById('defaultCanvas0');
-          if(canvas){
-            console.log('replacing canvas');
-            canvas.parentNode.removeChild(canvas);
-          }
-          if(!reloadOnce){
-            reload = true;
-            location.reload();
-          }
+    //run the code in the editor for the first time
+    setTimeout(updatePreview, 200);
+    //insert or remove js files
+    var reloadOnce = false;
+    $('input').change(function () {
+      // console.log('input changed');
+      if ($('input').is(':checked')) {
+        // console.log('input changed and input is checked now');
+        var head = document.getElementsByTagName('head')[0];
+        //inject p5.inspector.js
+        var script = document.createElement("script");
+        script.id = "p5Inspector";
+        script.type = "text/javascript";
+        script.src = "js/p5.inspector.js"; 
+        head.insertBefore(script, head.childNodes[1]);
+        console.log("injected p5.inspector.js");
+      } 
+      else {
+        //remove js files
+        $('#p5Inspector').remove();
+        var canvas = document.getElementById('defaultCanvas0');
+        if(canvas){
+          console.log('replacing canvas');
+          canvas.parentNode.removeChild(canvas);
         }
-      });
-    </script>
+        if(!reloadOnce){
+          reload = true;
+          location.reload();
+        }
+      }
+    });
+  </script>
   </body>
 </html>

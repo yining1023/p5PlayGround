@@ -1,5 +1,5 @@
 var myShapes = [];
-
+var selNumber;
 /*
 if (document.readyState === 'complete') {
   pauseP5();
@@ -13,6 +13,7 @@ if (document.readyState === 'complete') {
 }
 */
 var content0 = "\
+<!DOCTYPE html>\n\
 <html>\n\
   <head>\n\
     <meta charset='UTF-8'>\n\
@@ -23,10 +24,9 @@ var content0 = "\
   </head>\n\
   <body>\n\
     <script>\n\
-    var x = 0;\n\
     function setup() {\n\
       createCanvas(600, 600);\n\
-      stroke(0,125,255,0.6);\n\
+      stroke('rgba(0,125,255,0.6)');\n\
       fill('rgba(0,125,255,0.6)');\n";
 
 var content2 = "\
@@ -189,6 +189,9 @@ function CanvasState(canvas){
     for (var i = l-1; i >= 0; i--) {
       if (shapes[i].contains(mx, my)) {
         var mySel = shapes[i];
+        var selNumber0 = i;
+        selNumber = selNumber0;
+        console.log(selNumber);
         // Keep track of where in the object we clicked
         // so we can move it smoothly (see mousemove)
         myState.dragoffx = mx - mySel.x;
@@ -309,8 +312,7 @@ function CanvasState(canvas){
               break;
           }
           return;
-        }
-        
+        }       
       }
       // not over a selection box, return to normal
       myState.resizeDragging = false;
@@ -497,6 +499,7 @@ CanvasState.prototype.draw = function() {
     //wrap all lines
     var content = codeContent;
     // codeBlock.style.visibility = 'hidden';
+    //because of this line, it changes edit every second, slow down the program
     editor.setValue(content0+content+content2);
   }
     
@@ -507,6 +510,9 @@ CanvasState.prototype.draw = function() {
       ctx.lineWidth = this.selectionWidth;
       mySel = this.selection;
       ctx.strokeRect(mySel.x,mySel.y,mySel.w,mySel.h);
+      //if selected highlight the according code
+      var lineNumber = 15+selNumber;
+      editor.markText({line:lineNumber,ch:0},{line:lineNumber+1,ch:0},{className:"styled-background"});
     }
     
     // ** Add stuff you want drawn on top all the time here **
