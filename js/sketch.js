@@ -1,7 +1,7 @@
 var x = 0;
 function setup() {
   // Sets the screen to be 720 pixels wide and 400 pixels high
-  createCanvas(1000, 800);
+  createCanvas(600, 600);
   stroke(237, 34, 93);
   fill('rgba(237, 34, 93,0.8)');
 
@@ -17,6 +17,7 @@ function setup() {
   rect(379,227,40,90);
   rect(250,317,130,40);
   rect(251,79,40,147);
+  rect(251,80,146,40);
   
 }
 function draw(){

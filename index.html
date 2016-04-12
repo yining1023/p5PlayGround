@@ -6,6 +6,7 @@
     
     <script src="js/jquery.js" type="text/javascript"></script>
 
+    <link rel=stylesheet href="css/codemirror.css">
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
@@ -15,17 +16,41 @@
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
+    <script src="js/codemirror.js"></script>
+    <!--all kinds of mode for editor-->
+    <script src="js/xml.js"></script>
+    <script src="js/javascript.js"></script>
+    <script src="js/css.js"></script>
+    <script src="js/htmlmixed.js"></script>
+
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <script src="js/p5.js" type="text/javascript"></script>
     <script src="js/p5.dom.js" type="text/javascript"></script>
     <script src="js/p5.sound.js" type="text/javascript"></script>
-    <script src="js/sketch.js" type="text/javascript"></script>
 
     <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
 
     <style> 
-      body {padding: 0; margin: 0;} canvas {vertical-align: top;} 
-      #defaultCanvas0 {float: left;}
+      body {padding: 0; margin: 10px;} canvas {vertical-align: top;} 
+      #defaultCanvas0 {
+        width: 49%;
+        float: left;
+        border: 1px solid black;
+        border-right: 0px;
+      }
+      iframe {
+        width: 50%;
+        float: left;
+        height: 600px;
+        border: 1px solid black;
+        border-right: 0px;
+      }
+      .CodeMirror{
+        float: right;
+        height: 600px;
+        width: 50%;
+        border: 1px solid black;
+      }
     </style>
   </head>
 
@@ -67,5 +92,74 @@
         }
       });
     </script>
+    <article>
+    <!--the original text goes inside the editor-->
+    <textarea id=code name=code>
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>p5shapesTest</title>
+        <script src="js/p5.js" type="text/javascript"></script>
+        <script src="js/p5.dom.js" type="text/javascript"></script>
+        <script src="js/p5.sound.js" type="text/javascript"></script>
+        <style> body {padding: 0; margin: 0;} canvas {vertical-align: top;} </style>
+      </head>
+      <body>
+        <script>
+        var x = 0;
+        function setup() {
+        // Sets the screen to be 720 pixels wide and 400 pixels high
+        createCanvas(600, 600);
+        stroke(237, 34, 93);
+        fill('rgba(237, 34, 93,0.8)');
+
+        rect(63,186,38,298);
+
+        fill('rgba(0,125,255,0.6)');
+        stroke('rgba(0,125,255,0.6)');
+
+        rect(108,187,102,40);
+        rect(210,227,40,89);
+        rect(107,317,103,40);
+        rect(251,187,128,40);
+        rect(379,227,40,90);
+        rect(250,317,130,40);
+        rect(251,79,40,147);
+        rect(251,80,146,40);   
+        }
+        function draw(){
+        // background(255);
+        // x++;
+        // rect(x,79,153,40);
+        }
+        </script>
+      </body>
+    </html>
+    </textarea>
+    <!--end of the original text-->
+    <iframe id=preview></iframe>
+    <script>
+      var delay;
+      // Initialize CodeMirror editor with a nice html5 canvas demo.
+      var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
+        mode: 'text/html',
+        lineNumbers: true
+      });
+      editor.on("change", function() {
+        clearTimeout(delay);
+        delay = setTimeout(updatePreview, 300);
+      });
+      
+      function updatePreview() {
+        var previewFrame = document.getElementById('preview');
+        var preview =  previewFrame.contentDocument ||  previewFrame.contentWindow.document;
+        preview.open();
+        preview.write(editor.getValue());
+        preview.close();
+      }
+      setTimeout(updatePreview, 300);
+    </script>
+  </article>
   </body>
 </html>
