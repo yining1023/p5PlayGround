@@ -12,13 +12,36 @@ if (document.readyState === 'complete') {
   });
 }
 */
+var content0 = "\
+<html>\n\
+  <head>\n\
+    <meta charset='UTF-8'>\n\
+    <title>p5shapesTest</title>\n\
+    <script src='js/p5.js' type='text/javascript'></script>\n\
+    <script src='js/p5.dom.js' type='text/javascript'></script>\n\
+    <style> body {padding: 0; margin: 0;} canvas {vertical-align: top;} </style>\n\
+  </head>\n\
+  <body>\n\
+    <script>\n\
+    var x = 0;\n\
+    function setup() {\n\
+      createCanvas(600, 600);\n\
+      stroke(0,125,255,0.6);\n\
+      fill('rgba(0,125,255,0.6)');\n";
+
+var content2 = "\
+    }\n\
+    function draw(){}\n\
+    </script>\n\
+  </body>\n\
+</html>\n\
+";
 
 function replaceCanvasAndStartP5() {
   var canvas = document.getElementById('defaultCanvas0');
   if (canvas) {
     console.log('replacing canvas');
     canvas.parentNode.removeChild(canvas);
-
     pauseP5();
     setTimeout(function(){
       startP5();
@@ -30,14 +53,6 @@ function replaceCanvasAndStartP5() {
 }
 
 replaceCanvasAndStartP5();
-
-function wrapCode(){
-  document.getElementById('defaultCanvas0').style.float = 'left';
-  var editor = window.ace.edit("codeBlock");
-  // editor.setTheme("ace/theme/monokai");
-  // editor.getSession().setMode("ace/mode/javascript");
-  document.getElementById('codeBlock').style.fontSize='20px';
-}
 
 function pauseP5() {
   window.originalsetup = window.setup;
@@ -79,30 +94,24 @@ function startP5() {
     window.originalsetup();
 
     //link p5 canvas to myCanvas
-    var s = new CanvasState(document.getElementById('defaultCanvas0'));
+    var iframe = document.getElementById('preview');
+    var iframe_canvas = iframe.contentDocument || iframe.contentWindow.document;
+    var canvas0 = iframe_canvas.getElementById('defaultCanvas0');
+    var s = new CanvasState(canvas0);
 
-    //add a code block that has several code container inside
-    var codeBlock = document.createElement("div");
-    codeBlock.id = 'codeBlock';
-    document.body.appendChild(codeBlock);
-    codeBlock.style.float = 'left';
-    codeBlock.style.position = "absolute";
-    codeBlock.style.top = "100px";
-    codeBlock.style.left = "720px";
-
-    wrapCode();
-
-    //add code block and draw the code on canvas
+    //add each line in the code block
+    var codeContent = '';
     for(var i = 0; i < myShapes.length; i++){
       //draw shapes according to myShapes[]
       s.addShape(new Shape(s, myShapes[i].coordinates[0],myShapes[i].coordinates[1],
       myShapes[i].coordinates[2],myShapes[i].coordinates[3],'rgba(0,125,255,0.6)')); // The default color is blue now
-
-      var codeContent = myShapes[i].type + "(" + myShapes[i].coordinates + ");";
-      var code = document.createTextNode(codeContent);
-      codeBlock.appendChild(code);
-      codeBlock.appendChild(document.createElement('br'));
+      //go over each shape and create new lines
+      codeContent += "\u00A0"+"\u00A0"+"\u00A0"+"\u00A0"+"\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");"+"\n";
     }
+    //wrap all lines
+    var content = codeContent;
+    // codeBlock.style.visibility = 'hidden';
+    editor.setValue(content0+content+content2);
   }
   window.draw = window.originaldraw;
 
@@ -470,30 +479,26 @@ CanvasState.prototype.draw = function() {
     shapes = this.shapes;
     this.clear();
     
-    // ** Add stuff you want drawn in the background all the time here **
-    
+    // ** Add stuff you want drawn in the background all the time here **    
     // draw all shapes
     l = shapes.length;
-    var codeBlock = document.getElementById('codeBlock');
-      codeBlock.innerHTML = '';
+    //empty the codeblock first
+    var codeContent = '';
     for (var i = 0; i < l; i++) {
       var shape = shapes[i];
-      // console.log(shapes[i]);
       myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h];
-      // console.log(myShapes[i].coordinates);
-      // document.getElementById('codeContainer'+i).innerHTML = myShapes[i].type+"(" + myShapes[i].coordinates + ");"
-
-      var codeContent = myShapes[i].type + "(" + myShapes[i].coordinates + ");";
-      var code = document.createTextNode(codeContent);
-      codeBlock.appendChild(code);
-      codeBlock.appendChild(document.createElement('br'));
-
+      // go over each shape, create each code line
+      codeContent += "\u00A0"+"\u00A0"+"\u00A0"+"\u00A0"+"\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");" + "\n";
       // We can skip the drawing of elements that have moved off the screen:
       if (shape.x <= this.width && shape.y <= this.height &&
           shape.x + shape.w >= 0 && shape.y + shape.h >= 0){
         shapes[i].draw(ctx);
-      }
     }
+    //wrap all lines
+    var content = codeContent;
+    // codeBlock.style.visibility = 'hidden';
+    editor.setValue(content0+content+content2);
+  }
     
     // draw selection
     // right now this is just a stroke along the edge of the selected Shape

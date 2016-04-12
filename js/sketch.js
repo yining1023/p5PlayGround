@@ -21,7 +21,4 @@ function setup() {
   
 }
 function draw(){
-// background(255);
-// x++;
-// rect(x,79,153,40);
 }
