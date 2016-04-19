@@ -123,6 +123,8 @@
       preview.open();
       preview.write(editor.getValue());
       preview.close();
+      //call the hover function again after users changed the code in the editor, so users can manipulate the new code too
+      $('.cm-number').hover(hoverIn, hoverOut);
     }
 
     //run the code in the editor for the first time
@@ -178,11 +180,7 @@
     }
     //when click the button, change the number
     function add(){
-     // var cursorWord = editor.getCursor('start');
-     // console.log(cursorWord);
-     var word = editor.findWordAt(editor.getCursor()); 
-     // var changingString = editor.getRange(word.anchor, word.head);
-     // console.log("changingStrsing: "+changingString); 
+     var word = editor.findWordAt(editor.getCursor());
      var strValue = '100';
      editor.replaceRange(strValue, word.anchor, word.head);
      console.log('Clicked');
