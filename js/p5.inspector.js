@@ -25,7 +25,7 @@ var content0 = "\
   <body>\n\
     <script>\n\
     function setup() {\n\
-      createCanvas(600, 600);\n\
+      createCanvas(650, 600);\n\
       stroke('rgba(0,125,255,0.6)');\n\
       fill('rgba(0,125,255,0.6)');\n";
 

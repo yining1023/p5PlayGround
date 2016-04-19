@@ -7,13 +7,8 @@
     <script src="js/jquery.js" type="text/javascript"></script>
 
     <link rel=stylesheet href="css/codemirror.css">
-    <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
-    <!-- Optional theme -->
-<!--     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous"> -->
-
-    <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
     <script src="js/codemirror.js"></script>
@@ -52,19 +47,26 @@
       }
       .CodeMirror{
         float: right;
-        font-size: 14px;
+        font-size: 18px;
         /*height: auto;*/
         height: 600px;
         width: 50%;
         border: 1px solid black;
       }
-      .styled-background { background-color: #ff7; }
+      .styled-background { background-color: #ff7; 
+      }
+      h1{
+        text-align: center;
+      }
+      .toggle{
+        left: 600px;
+      }
     </style>
   </head>
 
   <body>
-    <h1>p5.PlayGround</h1>
-    <input onclick="addJs();" type="checkbox" data-toggle="toggle"  data-onstyle="info" />
+    <h1>p5.Play Ground | | p5.Tweak Mode</h1>
+    <input onclick="addJs();" type="checkbox" data-toggle="toggle"  data-onstyle="info" data-on="PlayGound" data-off="TweakMode"/>
     <article>
     <!--the original text goes inside the editor-->
     <textarea id='code' name='code'>
@@ -80,7 +82,7 @@
   <body>
     <script>
     function setup() {
-      createCanvas(600, 600);
+      createCanvas(650, 600);
       stroke('rgba(0,125,255,0.6)');
       fill('rgba(0,125,255,0.6)');
       rect(63,186,38,298);
@@ -113,6 +115,7 @@
         "Tab": "indentMore"
       }
     });
+
     //run the code in the editor
     function updatePreview() {
       var previewFrame = document.getElementById('preview');
@@ -121,21 +124,10 @@
       preview.write(editor.getValue());
       preview.close();
     }
-    
-    //live coding mode
-    editor.on("change", function() {
-      //something happened here slow down the program, code changes N times = N in myShapes
-      console.log('code changed in the editor');
-      if(!$('input').is(':checked')){
-        // console.log('off off');
-        clearTimeout(delay);
-        delay = setTimeout(updatePreview, 200);
-      }
-    });
-    // setTimeout(updatePreview, 200);
 
     //run the code in the editor for the first time
     setTimeout(updatePreview, 200);
+
     //insert or remove js files
     var reloadOnce = false;
     $('input').change(function () {
@@ -165,6 +157,50 @@
         }
       }
     });
+
+    //p5 tweak mode, add changing hard-coded number UI
+    //add hover event listener to all elements with class .cm-number
+    $('.cm-number').hover(hoverIn, hoverOut);
+    //when hover on one number, append a button to this number
+    function hoverIn(e) {
+      console.log('In In');
+      $("#tweakNumber").removeAttr("id");
+      $(e.target).attr("id", "tweakNumber");
+      if($('.tweakBtn').length == 0) {
+        $(e.target).append("<button class='tweakBtn' onclick='add()'>haha</button>");   
+      }
+    } 
+    //when hover out one number, delete the button
+    function hoverOut(e) { 
+     console.log('Out Out');
+     $('.tweakBtn').remove();
+     $(e.target).removeAttr("id");
+    }
+    //when click the button, change the number
+    function add(){
+     // var cursorWord = editor.getCursor('start');
+     // console.log(cursorWord);
+     var word = editor.findWordAt(editor.getCursor()); 
+     // var changingString = editor.getRange(word.anchor, word.head);
+     // console.log("changingStrsing: "+changingString); 
+     var strValue = '100';
+     editor.replaceRange(strValue, word.anchor, word.head);
+     console.log('Clicked');
+     $('.cm-number').hover(hoverIn, hoverOut);
+    }
+
+    //live coding mode
+    function handleChange(){
+      editor.on("change", function() {
+        //something happened here slow down the program, code changes N times = N in myShapes
+        console.log('code changed in the editor');
+        if(!$('input').is(':checked')){
+          clearTimeout(delay);
+          delay = setTimeout(updatePreview, 200);
+        }
+      });
+    }
+    handleChange();
   </script>
   </body>
 </html>

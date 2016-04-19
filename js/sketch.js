@@ -1,5 +1,5 @@
 function setup() {
-  createCanvas(600, 600);
+  createCanvas(650, 600);
   fill('rgba(0,125,255,0.6)');
   stroke('rgba(0,125,255,0.6)');
   rect(63,186,38,298);
