@@ -169,7 +169,7 @@
       $("#tweakNumber").removeAttr("id");
       $(e.target).attr("id", "tweakNumber");
       if($('.tweakBtn').length == 0) {
-        $(e.target).append("<button class='tweakBtn' onclick='add()'>haha</button>");   
+        $(e.target).append("<button class='tweakBtn' onclick='add()'>add</button>");   
       }
     } 
     //when hover out one number, delete the button
@@ -180,11 +180,18 @@
     }
     //when click the button, change the number
     function add(){
-     var word = editor.findWordAt(editor.getCursor());
-     var strValue = '100';
-     editor.replaceRange(strValue, word.anchor, word.head);
-     console.log('Clicked');
-     $('.cm-number').hover(hoverIn, hoverOut);
+      console.log('Clicked');
+      var word = editor.findWordAt(editor.getCursor());
+      var changingWord = editor.getRange(word.anchor, word.head);
+      console.log('number to be changed: '+changingWord);
+      var numValue = parseInt(changingWord)+10;
+      console.log('numvalue: '+numValue);
+      var strValue = numValue.toString();
+      console.log('strvalue: '+strValue);
+      if(!isNaN(numValue)){
+        editor.replaceRange(strValue, word.anchor, word.head);
+      }
+      // $('.cm-number').hover(hoverIn, hoverOut);
     }
 
     //live coding mode
