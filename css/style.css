@@ -34,25 +34,25 @@ iframe {
 .right{
   text-align: right;
 }
-.toggle-on.btn {
+.toggle-off.btn {
   background-color:#ec6089;
   color: #fff;
   border-color: #ec245e;
 }
-.toggle-off.btn {
+.toggle-on.btn {
   background-color:#4ca3ec;
   color: #fff;
   border-color: #2490ec;
 }
 .btn-info{
-  border-color: #ec245e;
+  border-color: #2490ec;
 }
-.btn-info:hover{
+.btn-default.active:hover{
   background-color:#ec245e;
   color: #fff;
   border-color: #ec245e;
 }
-.btn-default.active:hover{
+.btn-info:hover{
   background-color:#2490ec;
   color: #fff;
   border-color: #2490ec;

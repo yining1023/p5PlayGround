@@ -45,6 +45,14 @@ $('input').change(function () {
     console.log("injected p5.inspector.js");
   } 
   else {
+    var head = document.getElementsByTagName('head')[0];
+    //inject p5.inspector.js
+    var script = document.createElement("script");
+    script.id = "p5Inspector";
+    script.type = "text/javascript";
+    script.src = "js/p5.playground.js"; 
+    head.insertBefore(script, head.childNodes[1]);
+    console.log("injected p5.inspector.js");
     //remove js files
     $('#p5Inspector').remove();
     var canvas = document.getElementById('defaultCanvas0');
