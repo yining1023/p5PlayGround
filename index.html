@@ -6,6 +6,8 @@
     
     <script src="js/jquery.js" type="text/javascript"></script>
 
+    <!-- <script id = "p5Inspector" src="js/p5.playground.js" type="text/javascript"></script>-->
+
     <link rel=stylesheet href="css/codemirror.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
@@ -27,185 +29,47 @@
     <script src="js/sketch.js" type="text/javascript"></script>
 
     <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-
-    <style> 
-      body {padding: 0; margin: 10px;} canvas {vertical-align: top;} 
-      #defaultCanvas0 {
-        visibility: hidden;
-        height: 200px;
-        width: 49%;
-        float: left;
-        border: 1px solid black;
-        border-right: 0px;
-      }
-      iframe {
-        width: 50%;
-        float: left;
-        height: 600px;
-        border: 1px solid black;
-        border-right: 0px;
-      }
-      .CodeMirror{
-        float: right;
-        font-size: 18px;
-        /*height: auto;*/
-        height: 600px;
-        width: 50%;
-        border: 1px solid black;
-      }
-      .styled-background { background-color: #ff7; 
-      }
-      h1{
-        text-align: center;
-      }
-      .toggle{
-        left: 600px;
-      }
-    </style>
+    <link href="css/style.css" rel="stylesheet">
   </head>
 
   <body>
-    <h1>p5.Play Ground | | p5.Tweak Mode</h1>
-    <input onclick="addJs();" type="checkbox" data-toggle="toggle"  data-onstyle="info" data-on="PlayGound" data-off="TweakMode"/>
+    <div class="row">
+      <div class="col-md-6 right">
+        <h1 class="blue">p5.Play Ground</h1>
+        <div>Manipulate the shapes on the canvas</div>
+        <div>to see the code changes in real time</div>
+      </div>
+      <div class="col-md-6">
+        <h1 class="pink">p5.Live Coding</h1>
+        <div>Change the code in the editor</div>
+        <div>to see the result immediately</div>
+      </div>
+    </div>
+    <input onclick="addJs();" type="checkbox" data-toggle="toggle" data-style="fast" data-onstyle="info" data-on="LiveCoding" data-off="PlayGound"/>
     <article>
     <!--the original text goes inside the editor-->
     <textarea id='code' name='code'>
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <title>p5shapesTest</title>
-    <script src="js/p5.js" type="text/javascript"></script>
-    <script src="js/p5.dom.js" type="text/javascript"></script>
-    <style> body {padding: 0; margin: 0;} canvas {vertical-align: top;} </style>
-  </head>
-  <body>
-    <script>
-    function setup() {
-      createCanvas(650, 600);
-      stroke('rgba(0,125,255,0.6)');
-      fill('rgba(0,125,255,0.6)');
-      rect(63,186,38,298);
-      rect(108,187,102,40);
-      rect(210,227,40,89);
-      rect(107,317,103,40);
-      rect(251,187,128,40);
-      rect(379,227,40,90);
-      rect(250,317,130,40);
-      rect(251,79,40,147);
-      rect(251,80,146,40); 
-    }
-    function draw(){}
-    </script>
-  </body>
-</html>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>p5shapesTest</title><script src="js/p5.js" type="text/javascript"></script><script src="js/p5.dom.js" type="text/javascript"></script><style> body {padding: 0; margin: 0;} canvas {vertical-align: top;} </style></head><body><script>function setup() {
+  createCanvas(650, 600);
+  stroke('rgba(0,125,255,0.6)');
+  fill('rgba(0,125,255,0.6)');
+  rect(63,186,38,298);
+  rect(108,187,102,40);
+  rect(210,227,40,89);
+  rect(107,317,103,40);
+  rect(251,187,128,40);
+  rect(379,227,40,90);
+  rect(250,317,130,40);
+  rect(251,79,40,147);
+  rect(251,80,146,40); 
+}
+function draw(){
+
+}</script></body></html>
     </textarea>
     <!--end of the original text-->
     <iframe id='preview'></iframe>
   </article>
-  <script type="text/javascript">
-    // Initialize CodeMirror editor with a nice html5 canvas demo.
-    var delay;
-    var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
-      mode: 'text/html',
-      styleActiveLine: true,
-      lineNumbers: true,
-      lineWrapping: true,
-      extraKeys: {
-        "Tab": "indentMore"
-      }
-    });
-
-    //run the code in the editor
-    function updatePreview() {
-      var previewFrame = document.getElementById('preview');
-      var preview =  previewFrame.contentDocument ||  previewFrame.contentWindow.document;
-      preview.open();
-      preview.write(editor.getValue());
-      preview.close();
-      //call the hover function again after users changed the code in the editor, so users can manipulate the new code too
-      $('.cm-number').hover(hoverIn, hoverOut);
-    }
-
-    //run the code in the editor for the first time
-    setTimeout(updatePreview, 200);
-
-    //insert or remove js files
-    var reloadOnce = false;
-    $('input').change(function () {
-      // console.log('input changed');
-      if ($('input').is(':checked')) {
-        // console.log('input changed and input is checked now');
-        var head = document.getElementsByTagName('head')[0];
-        //inject p5.inspector.js
-        var script = document.createElement("script");
-        script.id = "p5Inspector";
-        script.type = "text/javascript";
-        script.src = "js/p5.inspector.js"; 
-        head.insertBefore(script, head.childNodes[1]);
-        console.log("injected p5.inspector.js");
-      } 
-      else {
-        //remove js files
-        $('#p5Inspector').remove();
-        var canvas = document.getElementById('defaultCanvas0');
-        if(canvas){
-          console.log('replacing canvas');
-          canvas.parentNode.removeChild(canvas);
-        }
-        if(!reloadOnce){
-          reload = true;
-          location.reload();
-        }
-      }
-    });
-
-    //p5 tweak mode, add changing hard-coded number UI
-    //add hover event listener to all elements with class .cm-number
-    $('.cm-number').hover(hoverIn, hoverOut);
-    //when hover on one number, append a button to this number
-    function hoverIn(e) {
-      console.log('In In');
-      $("#tweakNumber").removeAttr("id");
-      $(e.target).attr("id", "tweakNumber");
-      if($('.tweakBtn').length == 0) {
-        $(e.target).append("<button class='tweakBtn' onclick='add()'>add</button>");   
-      }
-    } 
-    //when hover out one number, delete the button
-    function hoverOut(e) { 
-     console.log('Out Out');
-     $('.tweakBtn').remove();
-     $(e.target).removeAttr("id");
-    }
-    //when click the button, change the number
-    function add(){
-      console.log('Clicked');
-      var word = editor.findWordAt(editor.getCursor());
-      var changingWord = editor.getRange(word.anchor, word.head);
-      console.log('number to be changed: '+changingWord);
-      var numValue = parseInt(changingWord)+10;
-      console.log('numvalue: '+numValue);
-      var strValue = numValue.toString();
-      console.log('strvalue: '+strValue);
-      if(!isNaN(numValue)){
-        editor.replaceRange(strValue, word.anchor, word.head);
-      }
-      // $('.cm-number').hover(hoverIn, hoverOut);
-    }
-
-    //live coding mode
-    function handleChange(){
-      editor.on("change", function() {
-        //something happened here slow down the program, code changes N times = N in myShapes
-        console.log('code changed in the editor');
-        if(!$('input').is(':checked')){
-          clearTimeout(delay);
-          delay = setTimeout(updatePreview, 200);
-        }
-      });
-    }
-    handleChange();
-  </script>
+  <script type="text/javascript" src="js/tweak.js"></script>
   </body>
 </html>

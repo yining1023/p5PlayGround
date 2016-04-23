@@ -13,29 +13,13 @@ if (document.readyState === 'complete') {
 }
 */
 var content0 = "\
-<!DOCTYPE html>\n\
-<html>\n\
-  <head>\n\
-    <meta charset='UTF-8'>\n\
-    <title>p5shapesTest</title>\n\
-    <script src='js/p5.js' type='text/javascript'></script>\n\
-    <script src='js/p5.dom.js' type='text/javascript'></script>\n\
-    <style> body {padding: 0; margin: 0;} canvas {vertical-align: top;} </style>\n\
-  </head>\n\
-  <body>\n\
-    <script>\n\
-    function setup() {\n\
-      createCanvas(650, 600);\n\
-      stroke('rgba(0,125,255,0.6)');\n\
-      fill('rgba(0,125,255,0.6)');\n";
+<script>function shapes() {\n\
+  createCanvas(650, 600);\n\
+  stroke('rgba(0,125,255,0.6)');\n\
+  fill('rgba(0,125,255,0.6)');\n";
 
-var content2 = "\
-    }\n\
-    function draw(){}\n\
-    </script>\n\
-  </body>\n\
-</html>\n\
-";
+var content2="\
+}";
 
 function replaceCanvasAndStartP5() {
   var canvas = document.getElementById('defaultCanvas0');
@@ -112,6 +96,8 @@ function startP5() {
     var content = codeContent;
     // codeBlock.style.visibility = 'hidden';
     editor.setValue(content0+content+content2);
+    //hide "<script>"
+    editor.markText({line:0,ch:0},{line:0,ch:8},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
   }
   window.draw = window.originaldraw;
 
@@ -490,7 +476,7 @@ CanvasState.prototype.draw = function() {
       var shape = shapes[i];
       myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h];
       // go over each shape, create each code line
-      codeContent += "\u00A0"+"\u00A0"+"\u00A0"+"\u00A0"+"\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");" + "\n";
+      codeContent += "\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");" + "\n";
       // We can skip the drawing of elements that have moved off the screen:
       if (shape.x <= this.width && shape.y <= this.height &&
           shape.x + shape.w >= 0 && shape.y + shape.h >= 0){
@@ -501,6 +487,10 @@ CanvasState.prototype.draw = function() {
     // codeBlock.style.visibility = 'hidden';
     //because of this line, it changes edit every second, slow down the program
     editor.setValue(content0+content+content2);
+    //hide "<script>"
+    editor.markText({line:0,ch:0},{line:0,ch:8},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
+    // //hide "</script>"
+    // editor.markText({line:13,ch:1},{line:13,ch:9},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
   }
     
     // draw selection
@@ -511,7 +501,7 @@ CanvasState.prototype.draw = function() {
       mySel = this.selection;
       ctx.strokeRect(mySel.x,mySel.y,mySel.w,mySel.h);
       //if selected highlight the according code
-      var lineNumber = 15+selNumber;
+      var lineNumber = 4+selNumber;
       editor.markText({line:lineNumber,ch:0},{line:lineNumber+1,ch:0},{className:"styled-background"});
     }
     

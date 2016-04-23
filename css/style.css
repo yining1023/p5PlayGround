@@ -1,0 +1,65 @@
+body {padding: 0; margin: 10px;} 
+canvas {vertical-align: top;} 
+#defaultCanvas0 {
+  visibility: hidden;
+  height: 200px;
+  width: 49%;
+  float: left;
+  border: 1px solid black;
+  border-right: 0px;
+}
+iframe {
+  width: 50%;
+  float: left;
+  height: 600px;
+  border: 1px solid black;
+  border-right: 0px;
+}
+.CodeMirror{
+  float: right;
+  font-size: 18px;
+  /*height: auto;*/
+  height: 600px;
+  width: 50%;
+  border: 1px solid black;
+}
+.styled-background { background-color: #ff7; 
+}
+.toggle{
+  left: 564px;
+}
+.fast .toggle-group {
+  transition: left 0.1s; -webkit-transition: left 0.2s; 
+}
+.right{
+  text-align: right;
+}
+.toggle-on.btn {
+  background-color:#ec6089;
+  color: #fff;
+  border-color: #ec245e;
+}
+.toggle-off.btn {
+  background-color:#4ca3ec;
+  color: #fff;
+  border-color: #2490ec;
+}
+.btn-info{
+  border-color: #ec245e;
+}
+.btn-info:hover{
+  background-color:#ec245e;
+  color: #fff;
+  border-color: #ec245e;
+}
+.btn-default.active:hover{
+  background-color:#2490ec;
+  color: #fff;
+  border-color: #2490ec;
+}
+.pink{
+  color: #ec245e;
+}
+.blue{
+ color: #2490ec;
+}
