@@ -3,6 +3,7 @@ var selNumber;
 var distance = [];
 var obj0, obj1, obj2;
 var centerX, centerY;//triangle's center point
+var addState = 'addRect';
 /*
 if (document.readyState === 'complete') {
   pauseP5();
@@ -15,6 +16,14 @@ if (document.readyState === 'complete') {
   });
 }
 */
+function addRect(){
+  addState = 'addRect'; //decide what to add in the doubleclick function
+}
+
+function addTriangle(){
+  addState = 'addTriangle';
+}
+
 var content0 = "\
 <script>function shapes() {\n\
   createCanvas(650, 600);\n\
@@ -461,18 +470,36 @@ function CanvasState(canvas){
   // double click for making new shapes
   canvas.addEventListener('dblclick', function(e) {
     var mouse = myState.getMouse(e);
-    //add new rect, green 20, 20
-    console.log('adding a triangle');
-    var triangle = new Triangle(myState, mouse.x - 20, mouse.y - 20, mouse.x + 20, mouse.y + 20, mouse.x - 20, mouse.y + 20, 'rgba(0,125,255,.6)');
-    myState.addShape(triangle);
-    //push new x, y, w, h to myShapes[]
-    // var newCoordinates = [mouse.x - 10, mouse.y - 10, 20, 20];
-    var newCoordinates = [mouse.x - 20, mouse.y - 20, mouse.x + 20, mouse.y + 20, mouse.x - 20, mouse.y + 20];
-    myShapes.push({
-      type: 'triangle',
-      coordinates: newCoordinates
-    });
-    //add a new code blocks
+    //add new triangle
+    if(addState === 'addTriangle'){
+      console.log('adding a triangle');
+
+      var triangle = new Triangle(myState, mouse.x - 20, mouse.y - 20, mouse.x + 20, mouse.y + 20,
+      mouse.x - 20, mouse.y + 20, 'rgba(0,125,255,.6)');
+
+      myState.addShape(triangle);
+      //push new x, y, x2, y2, x3, y3 to myShapes[]
+      var newCoordinates = [mouse.x - 20, mouse.y - 20, mouse.x + 20, mouse.y + 20, mouse.x - 20, 
+      mouse.y + 20];
+
+      myShapes.push({
+        type: 'triangle',
+        coordinates: newCoordinates
+      });
+    }
+    //add new rect, 40, 40
+    else if(addState === 'addRect'){
+      console.log('adding a rect');
+      var rect = new Shape(myState, mouse.x - 20, mouse.y - 20, 40, 60, 'rgba(0,125,255,.6)');
+      myState.addShape(rect);
+      //push new x, y, w, h to myShapes[]
+      var newCoordinates = [mouse.x - 20, mouse.y - 20, 40, 60];
+      myShapes.push({
+        type: 'rect',
+        coordinates: newCoordinates
+      });
+    }
+    //add a new code blocks, universal, no matter what kind of shape 
       var newCodeContainer = document.createElement("div");
       var lastShapeIndex = myShapes.length - 1
       newCodeContainer.id = "codeContainer"+ lastShapeIndex.toString();
@@ -522,10 +549,10 @@ CanvasState.prototype.draw = function() {
     var codeContent = '';
     for (var i = 0; i < l; i++) {
       var shape = shapes[i];
-      if(myShapes[i].type == 'rect'){
+      if(myShapes[i].type === 'rect'){
         myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h];
       }
-      else if(myShapes[i].type == 'triangle'){
+      else if(myShapes[i].type === 'triangle'){
         myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].x2, shapes[i].y2, 
         shapes[i].x3, shapes[i].y3];
       }

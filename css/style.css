@@ -1,4 +1,7 @@
 body {padding: 0; margin: 10px;} 
+h1{
+  font-family: courier;
+}
 canvas {vertical-align: top;} 
 #defaultCanvas0 {
   visibility: hidden;
@@ -26,6 +29,7 @@ iframe {
 .styled-background { background-color: #ff7; 
 }
 .toggle{
+  margin-top: 15px;
   left: 564px;
 }
 .fast .toggle-group {
