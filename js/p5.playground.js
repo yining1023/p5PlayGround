@@ -441,10 +441,10 @@ function CanvasState(canvas){
               myState.selection.y = my;
               break;
             case 1:
-              myState.selection.h = oldh/2 + (oldy - my)/2; //can only change height 
+              myState.selection.h = oldy - my; //can only change height 
               break;
             case 2:
-              myState.selection.w += oldx - mx; // can only change width
+              myState.selection.w = oldx - mx; // can only change width
               break;
             case 3:
               myState.selection.w = mx - oldx; // can only change width
