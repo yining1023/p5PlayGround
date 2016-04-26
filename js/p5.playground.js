@@ -3,6 +3,9 @@ var selNumber;
 var distance = [];
 var obj0, obj1, obj2;
 var centerX, centerY;//triangle's center point
+var distanceB = [];
+var objB0, objB1, objB2, objB3;
+var centerBX, centerBY;//bezier's center point
 var addState = 'addRect';
 /*
 if (document.readyState === 'complete') {
@@ -16,12 +19,17 @@ if (document.readyState === 'complete') {
   });
 }
 */
+//decide what to add in the doubleclick function
 function addRect(){
-  addState = 'addRect'; //decide what to add in the doubleclick function
+  addState = 'addRect'; 
 }
 
 function addTriangle(){
   addState = 'addTriangle';
+}
+
+function addBezier(){
+  addState = 'addBezier';
 }
 
 var content0 = "\
@@ -60,6 +68,7 @@ function pauseP5() {
 function modifyp5() {
   var p5triangle = window.triangle;
   var p5rect = window.rect;
+  var p5bezier = window.bezier;
 
   window.triangle = function(x1, y1, x2, y2, x3, y3) {
     console.log('drawing a p5 triangle',arguments);
@@ -81,6 +90,17 @@ function modifyp5() {
       coordinates: coordinates
     })
     p5rect.apply(window.p5, arguments);
+  }
+
+  window.bezier = function(x, y, x2, y2, x3, y3, x4, y4) {
+    console.log('drawing a p5 bezier',arguments);
+
+    var coordinates = [x, y, x2, y2, x3, y3, x4, y4];
+    myShapes.push({
+      type: 'bezier',
+      coordinates: coordinates
+    })
+    p5bezier.apply(window.p5, arguments);
   }
 }
 
@@ -106,6 +126,11 @@ function startP5() {
         s.addShape(new Triangle(s, myShapes[i].coordinates[0],myShapes[i].coordinates[1],
         myShapes[i].coordinates[2],myShapes[i].coordinates[3],
         myShapes[i].coordinates[4],myShapes[i].coordinates[5],'rgba(0,125,255,0.6)'));
+      }else if(myShapes[i].type == 'bezier'){
+        s.addShape(new Bezier(s, myShapes[i].coordinates[0],myShapes[i].coordinates[1],
+        myShapes[i].coordinates[2],myShapes[i].coordinates[3],
+        myShapes[i].coordinates[4],myShapes[i].coordinates[5],
+        myShapes[i].coordinates[6],myShapes[i].coordinates[7],'rgba(0,125,255,0.6)'));
       }     
       //go over each shape and create new lines
       codeContent += "\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");"+"\n";
@@ -215,7 +240,7 @@ function CanvasState(canvas){
           myState.dragoffx = mx - mySel.x;
           myState.dragoffy = my - mySel.y;
         }
-
+        //END OF RECTANGLE
         //TRIANGLE
         else if(mySel.type === 'TRIANGLE'){
           centerX = (mySel.x+mySel.x2+mySel.x3)/3;
@@ -235,12 +260,36 @@ function CanvasState(canvas){
             distance.push(obj1);
             distance.push(obj2);
           }
-
           myState.dragoffx = mx - centerX;
           myState.dragoffy = my - centerY;
         }
         //END OF TRIANGLE
+        //BEZIER
+        else if(mySel.type === 'BEZIER'){
+          centerBX = (mySel.x+mySel.x2+mySel.x3+mySel.x4)/4;
+          centerBY = (mySel.y+mySel.y2+mySel.y3+mySel.y4)/4;
 
+          //save the distance between Center and (x, y); Center and (x2, y2); Center and (x3, y3);
+          objB0 = {x: centerBX - mySel.x, y: centerBY - mySel.y};
+          objB1 = {x: centerBX - mySel.x2, y: centerBY - mySel.y2};
+          objB2 = {x: centerBX - mySel.x3, y: centerBY - mySel.y3};
+          objB3 = {x: centerBX - mySel.x4, y: centerBY - mySel.y4};
+          //if the distance is [], push three obj in, if there's already three objs in it, update them
+          if(distanceB.length == 4){
+            distanceB[0] = objB0;
+            distanceB[1] = objB1;
+            distanceB[2] = objB2;
+            distanceB[3] = objB3;
+          }else{
+            distanceB.push(objB0);
+            distanceB.push(objB1);
+            distanceB.push(objB2);
+            distanceB.push(objB3);
+          }
+          myState.dragoffx = mx - centerBX;
+          myState.dragoffy = my - centerBY;
+        }
+        //END OF  BEIZIER
         myState.dragging = true;
         myState.selection = mySel;
         myState.valid = false;
@@ -280,10 +329,24 @@ function CanvasState(canvas){
         myState.selection.x3 = Math.round(centerX - distance[2].x);
         myState.selection.y3 = Math.round(centerY - distance[2].y);
       }
+      //BEZIER
+      else if(myState.selection.type === 'BEZIER'){
+        centerBX = mouse.x - myState.dragoffx;
+        centerBY = mouse.y - myState.dragoffy;
+        myState.selection.x = Math.round(centerBX - distanceB[0].x);
+        myState.selection.y = Math.round(centerBY - distanceB[0].y);
+        myState.selection.x2 = Math.round(centerBX - distanceB[1].x);
+        myState.selection.y2 = Math.round(centerBY - distanceB[1].y);
+        myState.selection.x3 = Math.round(centerBX - distanceB[2].x);
+        myState.selection.y3 = Math.round(centerBY - distanceB[2].y);
+        myState.selection.x4 = Math.round(centerBX - distanceB[3].x);
+        myState.selection.y4 = Math.round(centerBY - distanceB[3].y);
+      }
+      //END OF BEZIER
 
       myState.valid = false; // Something's dragging so we must redraw
       //TRIANGLE
-      } else if(myState.resizeDragging){
+    } else if(myState.resizeDragging){
       //resize!
         if(myState.selection.type === 'RECTANGLE'){
         //RECT
@@ -364,6 +427,47 @@ function CanvasState(canvas){
               break;
           }
         }
+        else if(myState.selection.type === 'BEZIER'){
+        //BEZIER
+        // 1     0   
+        //        
+        // 3     2
+        //update the distance between center and x1,y1, x2,y2, x3, y3
+          function updateDisB(){
+            centerBX = (myState.selection.x+myState.selection.x2+myState.selection.x3+myState.selection.x4)/4;
+            centerBY = (myState.selection.y+myState.selection.y2+myState.selection.y3+myState.selection.y4)/4;
+            distanceB[0].x = centerBX - myState.selection.x;
+            distanceB[0].y = centerBY - myState.selection.y;
+            distanceB[1].x = centerBX - myState.selection.x2;
+            distanceB[1].y = centerBY - myState.selection.y2;
+            distanceB[2].x = centerBX - myState.selection.x3;
+            distanceB[2].y = centerBY - myState.selection.y3;
+            distanceB[3].x = centerBX - myState.selection.x4;
+            distanceB[3].y = centerBY - myState.selection.y4;
+          }
+          switch (myState.expectResize) {
+            case 0:
+              myState.selection.x = mx;
+              myState.selection.y = my;
+              updateDisB();
+              break;
+            case 1:
+              myState.selection.x2 = mx;
+              myState.selection.y2 = my;
+              updateDisB();
+              break;
+            case 2:
+              myState.selection.x3 = mx;
+              myState.selection.y3 = my;
+              updateDisB();
+              break;
+            case 3:
+              myState.selection.x4 = mx;
+              myState.selection.y4 = my;
+              updateDisB();
+              break;
+          }
+        }
       myState.valid = false; // Something's dragging so we must redraw
     }
     // if there's a selection see if we grabbed one of the selection handles
@@ -398,8 +502,41 @@ function CanvasState(canvas){
           }       
         }
       }
-      else if(myState.selection.type === 'RECTANGLE'){
+      //BEZIER
+      else if(myState.selection.type === 'BEZIER'){
+        for (i = 0; i < 4; i += 1) {
+          // 1     0   
+          //        
+          // 3     2       
+          cur = myState.selectionHandles[i];    
+          // we dont need to use the ghost context because
+          // selection handles will always be rectangles
+          if (mx >= cur.x && mx <= cur.x + myState.selectionBoxSize &&
+              my >= cur.y && my <= cur.y + myState.selectionBoxSize) {
+            // we found one!
+            myState.expectResize = i;
+            myState.valid = false;
+
+            switch (i) {
+              case 0:
+                this.style.cursor='nwse-resize';
+                break;
+              case 1:
+                this.style.cursor='nwse-resize';
+                break;
+              case 2:
+                this.style.cursor='nwse-resize';
+                break;
+              case 3:
+                this.style.cursor='nwse-resize';
+                break;
+            }
+            return;
+          }       
+        }
+      }
       //RECT
+      else if(myState.selection.type === 'RECTANGLE'){
         for (i = 0; i < 8; i += 1) {
           // 0  1  2
           // 3     4
@@ -474,13 +611,13 @@ function CanvasState(canvas){
     if(addState === 'addTriangle'){
       console.log('adding a triangle');
 
-      var triangle = new Triangle(myState, mouse.x, mouse.y - 20, mouse.x - 20*Math.sqrt(3), mouse.y + 20,
-      mouse.x + 20*Math.sqrt(3), mouse.y + 20, 'rgba(0,125,255,.6)');
+      var triangle = new Triangle(myState, mouse.x, mouse.y - 40, mouse.x - 20*Math.sqrt(3), 
+        mouse.y + 20, mouse.x + 20*Math.sqrt(3), mouse.y + 20, 'rgba(0,125,255,.6)');
 
       myState.addShape(triangle);
       //push new x, y, x2, y2, x3, y3 to myShapes[]
-      var newCoordinates = [mouse.x, mouse.y - 20, mouse.x - 20*Math.sqrt(3), mouse.y + 20,
-      mouse.x + 20*Math.sqrt(3), mouse.y + 20];
+      var newCoordinates = [mouse.x, mouse.y - 40, mouse.x - 20*Math.sqrt(3), mouse.y + 20,
+        mouse.x + 20*Math.sqrt(3), mouse.y + 20];
 
       myShapes.push({
         type: 'triangle',
@@ -491,11 +628,27 @@ function CanvasState(canvas){
     else if(addState === 'addRect'){
       console.log('adding a rect');
       var rect = new Shape(myState, mouse.x - 20, mouse.y - 20, 40, 60, 'rgba(0,125,255,.6)');
+
       myState.addShape(rect);
       //push new x, y, w, h to myShapes[]
       var newCoordinates = [mouse.x - 20, mouse.y - 20, 40, 60];
       myShapes.push({
         type: 'rect',
+        coordinates: newCoordinates
+      });
+    }
+    //add new bezier
+    else if(addState === 'addBezier'){
+      console.log('adding a bezier');
+      var bezier = new Bezier(myState, mouse.x, mouse.y, mouse.x - 75, mouse.y - 10, 
+        mouse.x + 5, mouse.y + 70, mouse.x - 70, mouse.y + 60, 'rgba(0,125,255,.6)');
+
+      myState.addShape(bezier);
+      //push new x, y, x2, y2, x3, y3, x4, y4 to myShapes[]
+      var newCoordinates = [mouse.x, mouse.y, mouse.x - 75, mouse.y - 10, 
+        mouse.x + 5, mouse.y + 70, mouse.x - 70, mouse.y + 60];
+      myShapes.push({
+        type: 'bezier',
         coordinates: newCoordinates
       });
     }
@@ -555,6 +708,10 @@ CanvasState.prototype.draw = function() {
       else if(myShapes[i].type === 'triangle'){
         myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].x2, shapes[i].y2, 
         shapes[i].x3, shapes[i].y3];
+      }
+      else if(myShapes[i].type === 'bezier'){
+        myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].x2, shapes[i].y2, 
+        shapes[i].x3, shapes[i].y3, shapes[i].x4, shapes[i].y4];
       }
       // go over each shape, create each code line
       codeContent += "\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");" + "\n";

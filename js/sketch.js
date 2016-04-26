@@ -2,6 +2,7 @@ function setup() {
   createCanvas(650, 600);
   fill('rgba(0,125,255,0.6)');
   stroke('rgba(0,125,255,0.6)');
+  strokeWeight(4);
   rect(300,100,50,100);
   // rect(108,187,102,40);
   // rect(210,227,40,89);
@@ -11,6 +12,7 @@ function setup() {
   // rect(250,317,130,40);
   // rect(251,79,40,147);
   // rect(251,80,146,40); 
-  triangle(100, 0, 200, 200, 100, 200);
+  triangle(100, 100, 200, 200, 100, 200);
+  bezier(85, 20, 10, 10, 90, 90, 15, 80);
 }
 function draw(){}

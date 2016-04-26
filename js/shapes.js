@@ -49,6 +49,7 @@ Shape.prototype.draw = function(ctx, optionalColor) {
   if (this.state.selection === this) {
     //draw the align lines
     ctx.strokeStyle = this.state.selectionColorLine;
+    ctx.lineWidth = 2;
     ctx.stroke();
     ctx.strokeStyle = this.state.selectionColor;
     ctx.lineWidth = this.state.selectionWidth;
@@ -121,6 +122,97 @@ Rect.prototype.draw = function() {
   Shape.prototype.draw.apply(this, arguments);
 }
 
+// **** BEZIER ***** //
+function Bezier(state, x, y, x2, y2, x3, y3, x4, y4, fill){
+  this.state = state;
+  this.x = x;
+  this.y = y;
+  this.x2 = x2;
+  this.y2 = y2;
+  this.x3 = x3;
+  this.y3 = y3;
+  this.x4 = x4;
+  this.y4 = y4;
+
+  this.fill = fill;
+
+  this.type = 'BEZIER';
+}
+
+Bezier.prototype.contains = function(mx, my){
+  var maxX = Math.max(this.x, this.x2, this.x3, this.x4);
+  var minX = Math.min(this.x, this.x2, this.x3, this.x4);
+  var maxY = Math.max(this.y, this.y2, this.y3, this.y4);
+  var minY = Math.min(this.y, this.y2, this.y3, this.y4);
+
+  return mx <= maxX && mx >= minX && my <= maxY && my >= minY; 
+}
+
+Bezier.prototype.draw = function(ctx, optionalColor){
+  var i, cur, half;
+
+  ctx.fillStyle = this.fill;
+  ctx.strokeStyle = this.fill;
+
+  ctx.beginPath();
+  ctx.moveTo(this.x, this.y);  
+  ctx.bezierCurveTo(this.x2, this.y2, this.x3, this.y3, this.x4, this.y4);
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  //draw some lines to help align
+  //x axis: from 0 to x 
+  ctx.beginPath();
+  ctx.moveTo(0, this.y - 5);
+  ctx.lineTo(0, this.y + 5);
+  ctx.moveTo(0, this.y);
+  ctx.lineTo(this.x, this.y);
+  //y axis from 0 to y
+  ctx.lineTo(this.x, 0);
+  ctx.moveTo(this.x - 5, 0);
+  ctx.lineTo(this.x + 5, 0);
+
+  if (this.state.selection === this) {
+    ctx.strokeStyle = this.state.selectionColorLine;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    //draw two control lines
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.x2, this.y2);
+    ctx.moveTo(this.x3, this.y3);
+    ctx.lineTo(this.x4, this.y4);
+    // ctx.closePath();
+    ctx.strokeStyle = this.state.selectionColor;
+    ctx.lineWidth = this.state.selectionWidth;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // draw the boxes
+    half = this.state.selectionBoxSize / 2; //selectionBoxSize = 6
+    
+    // 1     0
+    //
+    // 3     2   
+    this.state.selectionHandles[0].x = this.x-half;
+    this.state.selectionHandles[0].y = this.y-half;
+    
+    this.state.selectionHandles[1].x = this.x2-half;//use right coordinates! in this case, are x2, y2 not w or h
+    this.state.selectionHandles[1].y = this.y2-half;
+    
+    this.state.selectionHandles[2].x = this.x3-half;
+    this.state.selectionHandles[2].y = this.y3-half;
+
+    this.state.selectionHandles[3].x = this.x4-half;
+    this.state.selectionHandles[3].y = this.y4-half;
+
+    ctx.fillStyle = this.state.selectionBoxColor;
+    for (i = 0; i < 4; i += 1) {
+      cur = this.state.selectionHandles[i];
+      ctx.fillRect(cur.x, cur.y, this.state.selectionBoxSize, this.state.selectionBoxSize);
+    }
+  }
+}
+
 // *** TRIANGLE **** //
 function Triangle(state, x, y, x2, y2, x3, y3, fill) {
   this.state = state;
@@ -136,12 +228,6 @@ function Triangle(state, x, y, x2, y2, x3, y3, fill) {
 }
 
 Triangle.prototype.contains = function(mx, my) {
-  // var maxX = Math.max(this.x, this.x2, this.x3);
-  // var minX = Math.min(this.x, this.x2, this.x3);
-  // var maxY = Math.max(this.y, this.y2, this.y3);
-  // var minY = Math.min(this.y, this.y2, this.y3);
-
-  // return mx <= maxX && mx >= minX && my <= maxY && my >= minY;
   var vertx=[this.x, this.x2, this.x3];
   var verty=[this.y, this.y2, this.y3];
   var i, j, c = false;
@@ -181,6 +267,7 @@ Triangle.prototype.draw = function(ctx, optionalColor) {
 
   if (this.state.selection === this) {
     ctx.strokeStyle = this.state.selectionColorLine;
+    ctx.lineWidth = 2;
     ctx.stroke();
     //draw the outline of the triangle
     ctx.beginPath();
@@ -190,6 +277,7 @@ Triangle.prototype.draw = function(ctx, optionalColor) {
     ctx.closePath();
     ctx.strokeStyle = this.state.selectionColor;
     ctx.lineWidth = this.state.selectionWidth;
+    ctx.lineWidth = 2;
     ctx.stroke();
     // draw the boxes
     half = this.state.selectionBoxSize / 2; //selectionBoxSize = 6
