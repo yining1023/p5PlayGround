@@ -474,13 +474,13 @@ function CanvasState(canvas){
     if(addState === 'addTriangle'){
       console.log('adding a triangle');
 
-      var triangle = new Triangle(myState, mouse.x - 20, mouse.y - 20, mouse.x + 20, mouse.y + 20,
-      mouse.x - 20, mouse.y + 20, 'rgba(0,125,255,.6)');
+      var triangle = new Triangle(myState, mouse.x, mouse.y - 20, mouse.x - 20*Math.sqrt(3), mouse.y + 20,
+      mouse.x + 20*Math.sqrt(3), mouse.y + 20, 'rgba(0,125,255,.6)');
 
       myState.addShape(triangle);
       //push new x, y, x2, y2, x3, y3 to myShapes[]
-      var newCoordinates = [mouse.x - 20, mouse.y - 20, mouse.x + 20, mouse.y + 20, mouse.x - 20, 
-      mouse.y + 20];
+      var newCoordinates = [mouse.x, mouse.y - 20, mouse.x - 20*Math.sqrt(3), mouse.y + 20,
+      mouse.x + 20*Math.sqrt(3), mouse.y + 20];
 
       myShapes.push({
         type: 'triangle',

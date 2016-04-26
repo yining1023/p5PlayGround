@@ -65,5 +65,20 @@ iframe {
   color: #ec245e;
 }
 .blue{
- color: #2490ec;
+  color: #2490ec;
+}
+.red
+{
+  background-color: #005ba8;
+  border-color: #005ba8;
+}
+input{
+  background-color: white;
+  margin-bottom: 5px;
+  background-color: #82bbec;
+  border-color: #82bbec;
+  color:white;
+}
+input:hover{
+  border-color: #005ba8;
 }

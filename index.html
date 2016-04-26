@@ -44,9 +44,9 @@
       </div>
     </div>
     <input onclick="addJs();" type="checkbox" data-toggle="toggle" data-style="fast" data-onstyle="info" data-on="PlayGround" data-off="LiveCoding"/>
-    <div>Double click on the canvas to add new shapes</div>
-    <button onclick="addRect()">Rect</button>
-    <button onclick="addTriangle()">Triangle</button>
+    <div>Choose a shape below and Double-click on the canvas to add new shapes</div>
+    <input class="red" type="submit" value="Rect" name="btnsubmit" id="answer" onclick="addRect()" />
+    <input type="submit" value="Triangle" name="btnsubmit" id="answer" onclick="addTriangle()" />
     <article>
     <!--the original text goes inside the editor-->
     <textarea id='code' name='code'>
@@ -72,5 +72,12 @@ function draw(){
     <iframe id='preview'></iframe>
   </article>
   <script type="text/javascript" src="js/liveCoding.js"></script>
+  <!--toggle the style of shape buttons-->
+  <script>
+    $("input[type='submit']").click(function(){
+      $("input[type='submit'].red").removeClass('red')
+      $(this).addClass('red');
+    });
+  </script>
   </body>
 </html>

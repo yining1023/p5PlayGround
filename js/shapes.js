@@ -136,12 +136,22 @@ function Triangle(state, x, y, x2, y2, x3, y3, fill) {
 }
 
 Triangle.prototype.contains = function(mx, my) {
-  var maxX = Math.max(this.x, this.x2, this.x3);
-  var minX = Math.min(this.x, this.x2, this.x3);
-  var maxY = Math.max(this.y, this.y2, this.y3);
-  var minY = Math.min(this.y, this.y2, this.y3);
+  // var maxX = Math.max(this.x, this.x2, this.x3);
+  // var minX = Math.min(this.x, this.x2, this.x3);
+  // var maxY = Math.max(this.y, this.y2, this.y3);
+  // var minY = Math.min(this.y, this.y2, this.y3);
 
-  return mx <= maxX && mx >= minX && my <= maxY && my >= minY;  
+  // return mx <= maxX && mx >= minX && my <= maxY && my >= minY;
+  var vertx=[this.x, this.x2, this.x3];
+  var verty=[this.y, this.y2, this.y3];
+  var i, j, c = false;
+    for( i = 0, j = 3-1; i < 3; j = i++ ) {
+        if( ( ( verty[i] > my ) != ( verty[j] > my ) ) &&
+            ( mx < ( vertx[j] - vertx[i] ) * ( my - verty[i] ) / ( verty[j] - verty[i] ) + vertx[i] ) ) {
+                c = !c;
+        }
+    }
+  return c;
 }
 
 Triangle.prototype.draw = function(ctx, optionalColor) {
@@ -153,6 +163,7 @@ Triangle.prototype.draw = function(ctx, optionalColor) {
   ctx.moveTo(this.x, this.y);
   ctx.lineTo(this.x2, this.y2);
   ctx.lineTo(this.x3, this.y3);
+  ctx.lineTo(this.x,this.y);
   ctx.closePath();
   ctx.fill();
 
