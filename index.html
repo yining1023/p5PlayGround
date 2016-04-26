@@ -3,15 +3,15 @@
   <head>
     <meta charset="UTF-8">
     <title>p5PlayGround</title>
-    
-    <script src="js/jquery.js" type="text/javascript"></script>
-
-    <!-- <script id = "p5Inspector" src="js/p5.playground.js" type="text/javascript"></script>-->
 
     <link rel=stylesheet href="css/codemirror.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 
+    <script src="js/jquery.js" type="text/javascript"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <script src="js/bootstrap-toggle.min.js"></script>
 
     <script src="js/codemirror.js"></script>
     <!--all kinds of mode for editor-->
@@ -22,14 +22,12 @@
     <script src="js/active-line.js"></script>
     <script src="js/mark-selection.js"></script>
 
-    <script src="js/bootstrap-toggle.min.js"></script>
     <script src="js/p5.js" type="text/javascript"></script>
     <script src="js/p5.dom.js" type="text/javascript"></script>
     <!--<script src="js/p5.sound.js" type="text/javascript"></script>-->
     <script src="js/sketch.js" type="text/javascript"></script>
-
-    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
+    <script src="js/shapes.js" type="text/javascript"></script>
+    <script id = "p5Inspector" src="js/p5.playground.js" type="text/javascript"></script>
   </head>
 
   <body>
@@ -50,7 +48,7 @@
     <!--the original text goes inside the editor-->
     <textarea id='code' name='code'>
 <!DOCTYPE html><html><head><meta charset="UTF-8"><title>p5shapesTest</title><script src="js/p5.js" type="text/javascript"></script><script src="js/p5.dom.js" type="text/javascript"></script><style> body {padding: 0; margin: 0;} canvas {vertical-align: top;} </style></head><body><script>function setup() {
-  createCanvas(650, 600);
+  createCanvas(600, 600);
   stroke('rgba(0,125,255,0.6)');
   fill('rgba(0,125,255,0.6)');
   rect(63,186,38,298);
@@ -61,7 +59,7 @@
   rect(379,227,40,90);
   rect(250,317,130,40);
   rect(251,79,40,147);
-  rect(251,80,146,40); 
+  rect(251,80,146,40);
 }
 function draw(){
 
@@ -70,6 +68,6 @@ function draw(){
     <!--end of the original text-->
     <iframe id='preview'></iframe>
   </article>
-  <script type="text/javascript" src="js/tweak.js"></script>
+  <script type="text/javascript" src="js/liveCoding.js"></script>
   </body>
 </html>

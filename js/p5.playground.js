@@ -1,5 +1,8 @@
 var myShapes = [];
 var selNumber;
+var distance = [];
+var obj0, obj1, obj2;
+var centerX, centerY;//triangle's center point
 /*
 if (document.readyState === 'complete') {
   pauseP5();
@@ -36,7 +39,7 @@ function replaceCanvasAndStartP5() {
   }
 }
 
-replaceCanvasAndStartP5();
+// replaceCanvasAndStartP5();
 
 function pauseP5() {
   window.originalsetup = window.setup;
@@ -86,18 +89,24 @@ function startP5() {
     //add each line in the code block
     var codeContent = '';
     for(var i = 0; i < myShapes.length; i++){
-      //draw shapes according to myShapes[]
-      s.addShape(new Shape(s, myShapes[i].coordinates[0],myShapes[i].coordinates[1],
-      myShapes[i].coordinates[2],myShapes[i].coordinates[3],'rgba(0,125,255,0.6)')); // The default color is blue now
+      //add shapes according to myShapes[]
+      if(myShapes[i].type == 'rect'){
+        s.addShape(new Shape(s, myShapes[i].coordinates[0],myShapes[i].coordinates[1],
+        myShapes[i].coordinates[2],myShapes[i].coordinates[3],'rgba(0,125,255,0.6)')); // The default color is blue
+      }else if(myShapes[i].type == 'triangle'){
+        s.addShape(new Triangle(s, myShapes[i].coordinates[0],myShapes[i].coordinates[1],
+        myShapes[i].coordinates[2],myShapes[i].coordinates[3],
+        myShapes[i].coordinates[4],myShapes[i].coordinates[5],'rgba(0,125,255,0.6)'));
+      }     
       //go over each shape and create new lines
-      codeContent += "\u00A0"+"\u00A0"+"\u00A0"+"\u00A0"+"\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");"+"\n";
+      codeContent += "\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");"+"\n";
     }
     //wrap all lines
     var content = codeContent;
     // codeBlock.style.visibility = 'hidden';
     editor.setValue(content0+content+content2);
     //hide "<script>"
-    editor.markText({line:0,ch:0},{line:0,ch:8},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
+    // editor.markText({line:0,ch:0},{line:0,ch:8},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
   }
   window.draw = window.originaldraw;
 
@@ -139,15 +148,27 @@ function CanvasState(canvas){
   this.dragoffx = 0; // See mousedown and mousemove events for explanation
   this.dragoffy = 0;
 
-  // Holds the 8 tiny boxes that will be our selection handles
-  // the selection handles will be in this order:
+  // Holds the tiny boxes that will be our selection handles
+  // Rect the selection handles will be in this order:
   // 0  1  2
   // 3     4
   // 5  6  7
+  // Triangle the selection handles will be in this order:
+  //    0   
+  //        
+  // 1     2
+  
   this.selectionHandles = [];
-  for (i = 0; i < 8; i += 1) {
-    this.selectionHandles.push(new Shape(this));
-  }
+  // if(){
+    // debugger;
+    // for (i = 0; i < 8; i += 1) {
+    //   this.selectionHandles.push(new Rect(this));
+    // }
+    for (i = 0; i < 8; i += 1) {
+      this.selectionHandles.push(new Rect(this));
+    }
+  // }
+
 
   // **** Then events! ****
   
@@ -177,11 +198,40 @@ function CanvasState(canvas){
         var mySel = shapes[i];
         var selNumber0 = i;
         selNumber = selNumber0;
-        console.log(selNumber);
         // Keep track of where in the object we clicked
         // so we can move it smoothly (see mousemove)
-        myState.dragoffx = mx - mySel.x;
-        myState.dragoffy = my - mySel.y;
+
+        //RECTANGLE
+        if(mySel.type === 'RECTANGLE'){
+          myState.dragoffx = mx - mySel.x;
+          myState.dragoffy = my - mySel.y;
+        }
+
+        //TRIANGLE
+        else if(mySel.type === 'TRIANGLE'){
+          centerX = (mySel.x+mySel.x2+mySel.x3)/3;
+          centerY = (mySel.y+mySel.y2+mySel.y3)/3;
+
+          //save the distance between Center and (x, y); Center and (x2, y2); Center and (x3, y3);
+          obj0 = {x: centerX - mySel.x, y: centerY - mySel.y};
+          obj1 = {x: centerX - mySel.x2, y: centerY - mySel.y2};
+          obj2 = {x: centerX - mySel.x3, y: centerY - mySel.y3};
+          //if the distance is [], push three obj in, if there's already three objs in it, update them
+          if(distance.length == 3){
+            distance[0] = obj0;
+            distance[1] = obj1;
+            distance[2] = obj2;
+          }else{
+            distance.push(obj0);
+            distance.push(obj1);
+            distance.push(obj2);
+          }
+
+          myState.dragoffx = mx - centerX;
+          myState.dragoffy = my - centerY;
+        }
+        //END OF TRIANGLE
+
         myState.dragging = true;
         myState.selection = mySel;
         myState.valid = false;
@@ -195,6 +245,7 @@ function CanvasState(canvas){
       myState.valid = false; // Need to clear the old selection border
     }
   }, true);
+
   canvas.addEventListener('mousemove', function(e) {
     var mouse = myState.getMouse(e),
         mx = mouse.x,
@@ -204,101 +255,186 @@ function CanvasState(canvas){
       var mouse = myState.getMouse(e);
       // We don't want to drag the object by its top-left corner, we want to drag it
       // from where we clicked. Thats why we saved the offset and use it here
-      myState.selection.x = mouse.x - myState.dragoffx;
-      myState.selection.y = mouse.y - myState.dragoffy;   
-      myState.valid = false; // Something's dragging so we must redraw
-    } else if(myState.resizeDragging){
-      //resize!
-      oldx = myState.selection.x;
-      oldy = myState.selection.y;
-      
-      // 0  1  2
-      // 3     4
-      // 5  6  7
-      switch (myState.expectResize) {
-        case 0:
-          myState.selection.x = mx;
-          myState.selection.y = my;
-          myState.selection.w += oldx - mx;
-          myState.selection.h += oldy - my;
-          break;
-        case 1:
-          myState.selection.y = my;
-          myState.selection.h += oldy - my;
-          break;
-        case 2:
-          myState.selection.y = my;
-          myState.selection.w = mx - oldx;
-          myState.selection.h += oldy - my;
-          break;
-        case 3:
-          myState.selection.x = mx;
-          myState.selection.w += oldx - mx;
-          break;
-        case 4:
-          myState.selection.w = mx - oldx;
-          break;
-        case 5:
-          myState.selection.x = mx;
-          myState.selection.w += oldx - mx;
-          myState.selection.h = my - oldy;
-          break;
-        case 6:
-          myState.selection.h = my - oldy;
-          break;
-        case 7:
-          myState.selection.w = mx - oldx;
-          myState.selection.h = my - oldy;
-          break;
+      //RECT      
+      if(myState.selection.type === 'RECTANGLE'){
+        myState.selection.x = mouse.x - myState.dragoffx;
+        myState.selection.y = mouse.y - myState.dragoffy;
       }
-      
+      //TRIANGLE
+      else if(myState.selection.type === 'TRIANGLE'){
+        centerX = mouse.x - myState.dragoffx;
+        centerY = mouse.y - myState.dragoffy;
+        myState.selection.x = Math.round(centerX - distance[0].x);
+        myState.selection.y = Math.round(centerY - distance[0].y);
+        myState.selection.x2 = Math.round(centerX - distance[1].x);
+        myState.selection.y2 = Math.round(centerY - distance[1].y);
+        myState.selection.x3 = Math.round(centerX - distance[2].x);
+        myState.selection.y3 = Math.round(centerY - distance[2].y);
+      }
+
+      myState.valid = false; // Something's dragging so we must redraw
+      //TRIANGLE
+      } else if(myState.resizeDragging){
+      //resize!
+        if(myState.selection.type === 'RECTANGLE'){
+        //RECT
+          oldx = myState.selection.x;
+          oldy = myState.selection.y;
+          
+          // 0  1  2
+          // 3     4
+          // 5  6  7
+          switch (myState.expectResize) {
+            case 0:
+              myState.selection.x = mx;
+              myState.selection.y = my;
+              myState.selection.w += oldx - mx;
+              myState.selection.h += oldy - my;
+              break;
+            case 1:
+              myState.selection.y = my;
+              myState.selection.h += oldy - my; //can only change height 
+              break;
+            case 2:
+              myState.selection.y = my;
+              myState.selection.w = mx - oldx;
+              myState.selection.h += oldy - my;
+              break;
+            case 3:
+              myState.selection.x = mx;
+              myState.selection.w += oldx - mx; // can only change width
+              break;
+            case 4:
+              myState.selection.w = mx - oldx; // can only change width
+              break;
+            case 5:
+              myState.selection.x = mx;
+              myState.selection.w += oldx - mx;
+              myState.selection.h = my - oldy;
+              break;
+            case 6:
+              myState.selection.h = my - oldy; //can only change height
+              break;
+            case 7:
+              myState.selection.w = mx - oldx;
+              myState.selection.h = my - oldy;
+              break;
+          }
+        }
+        else if(myState.selection.type === 'TRIANGLE'){
+        //TRIANGLE
+        //    0   
+        //        
+        // 1     2
+        //update the distance between center and x1,y1, x2,y2, x3, y3
+          function updateDis(){
+            centerX = (myState.selection.x+myState.selection.x2+myState.selection.x3)/3;
+            centerY = (myState.selection.y+myState.selection.y2+myState.selection.y3)/3;
+            distance[0].x = centerX - myState.selection.x;
+            distance[0].y = centerY - myState.selection.y;
+            distance[1].x = centerX - myState.selection.x2;
+            distance[1].y = centerY - myState.selection.y2;
+            distance[2].x = centerX - myState.selection.x3;
+            distance[2].y = centerY - myState.selection.y3;
+          }
+          switch (myState.expectResize) {
+            case 0:
+              myState.selection.x = mx;
+              myState.selection.y = my;
+              updateDis();
+              break;
+            case 1:
+              myState.selection.x2 = mx;
+              myState.selection.y2 = my;
+              updateDis();
+              break;
+            case 2:
+              myState.selection.x3 = mx;
+              myState.selection.y3 = my;
+              updateDis();
+              break;
+          }
+        }
       myState.valid = false; // Something's dragging so we must redraw
     }
     // if there's a selection see if we grabbed one of the selection handles
     if (myState.selection !== null && !myState.resizeDragging) {
-      for (i = 0; i < 8; i += 1) {
-        // 0  1  2
-        // 3     4
-        // 5  6  7
-        
-        cur = myState.selectionHandles[i];
-        
-        // we dont need to use the ghost context because
-        // selection handles will always be rectangles
-        if (mx >= cur.x && mx <= cur.x + myState.selectionBoxSize &&
-            my >= cur.y && my <= cur.y + myState.selectionBoxSize) {
-          // we found one!
-          myState.expectResize = i;
-          myState.valid = false;
+      //TRIANGLE
+      if(myState.selection.type === 'TRIANGLE'){
+        for (i = 0; i < 3; i += 1) {
+          //    0   
+          //        
+          // 1     2       
+          cur = myState.selectionHandles[i];    
+          // we dont need to use the ghost context because
+          // selection handles will always be rectangles
+          if (mx >= cur.x && mx <= cur.x + myState.selectionBoxSize &&
+              my >= cur.y && my <= cur.y + myState.selectionBoxSize) {
+            // we found one!
+            myState.expectResize = i;
+            myState.valid = false;
+
+            switch (i) {
+              case 0:
+                this.style.cursor='nwse-resize';
+                break;
+              case 1:
+                this.style.cursor='nwse-resize';
+                break;
+              case 2:
+                this.style.cursor='nwse-resize';
+                break;
+            }
+            return;
+          }       
+        }
+      }
+      else if(myState.selection.type === 'RECTANGLE'){
+      //RECT
+        for (i = 0; i < 8; i += 1) {
+          // 0  1  2
+          // 3     4
+          // 5  6  7
           
-          switch (i) {
-            case 0:
-              this.style.cursor='nw-resize';
-              break;
-            case 1:
-              this.style.cursor='n-resize';
-              break;
-            case 2:
-              this.style.cursor='ne-resize';
-              break;
-            case 3:
-              this.style.cursor='w-resize';
-              break;
-            case 4:
-              this.style.cursor='e-resize';
-              break;
-            case 5:
-              this.style.cursor='sw-resize';
-              break;
-            case 6:
-              this.style.cursor='s-resize';
-              break;
-            case 7:
-              this.style.cursor='se-resize';
-              break;
-          }
-          return;
-        }       
+          cur = myState.selectionHandles[i];
+          
+          // we dont need to use the ghost context because
+          // selection handles will always be rectangles
+          if (mx >= cur.x && mx <= cur.x + myState.selectionBoxSize &&
+              my >= cur.y && my <= cur.y + myState.selectionBoxSize) {
+            // we found one!
+            myState.expectResize = i;
+            myState.valid = false;
+            
+            switch (i) {
+              case 0:
+                this.style.cursor='nw-resize';
+                break;
+              case 1:
+                this.style.cursor='n-resize';
+                break;
+              case 2:
+                this.style.cursor='ne-resize';
+                break;
+              case 3:
+                this.style.cursor='w-resize';
+                break;
+              case 4:
+                this.style.cursor='e-resize';
+                break;
+              case 5:
+                this.style.cursor='sw-resize';
+                break;
+              case 6:
+                this.style.cursor='s-resize';
+                break;
+              case 7:
+                this.style.cursor='se-resize';
+                break;
+            }
+            return;
+          }       
+        }
       }
       // not over a selection box, return to normal
       myState.resizeDragging = false;
@@ -306,6 +442,7 @@ function CanvasState(canvas){
       this.style.cursor = 'auto';
     }
   }, true);
+
   canvas.addEventListener('mouseup', function(e) {
     myState.dragging = false;
     myState.resizeDragging = false;
@@ -325,11 +462,14 @@ function CanvasState(canvas){
   canvas.addEventListener('dblclick', function(e) {
     var mouse = myState.getMouse(e);
     //add new rect, green 20, 20
-    myState.addShape(new Shape(myState, mouse.x - 10, mouse.y - 10, 40, 40, 'rgba(0,125,255,.6)'));
+    console.log('adding a triangle');
+    var triangle = new Triangle(myState, mouse.x - 20, mouse.y - 20, mouse.x + 20, mouse.y + 20, mouse.x - 20, mouse.y + 20, 'rgba(0,125,255,.6)');
+    myState.addShape(triangle);
     //push new x, y, w, h to myShapes[]
-    var newCoordinates = [mouse.x - 10, mouse.y - 10, 20, 20];
+    // var newCoordinates = [mouse.x - 10, mouse.y - 10, 20, 20];
+    var newCoordinates = [mouse.x - 20, mouse.y - 20, mouse.x + 20, mouse.y + 20, mouse.x - 20, mouse.y + 20];
     myShapes.push({
-      type: 'rect',
+      type: 'triangle',
       coordinates: newCoordinates
     });
     //add a new code blocks
@@ -340,113 +480,21 @@ function CanvasState(canvas){
         + myShapes[myShapes.length - 1].coordinates + ");";
       var newCode = document.createTextNode(newCodeContent);
       newCodeContainer.appendChild(newCode);
-      var codeBlock = document.getElementById('codeBlock');
-      codeBlock.appendChild(newCodeContainer);
+      // var codeBlock = document.getElementById('codeBlock');
+      // codeBlock.appendChild(newCodeContainer);
   }, true);
   
   // **** Options! ****
   
   this.selectionColor = '#FF00A8';
   this.selectionColorLine = '#00fffc';
-  this.selectionWidth = 1.5;
-  this.selectionBoxSize = 6;
+  this.selectionWidth = 2;
+  this.selectionBoxSize = 8;
   this.selectionBoxColor = 'darkred';  
   this.interval = 30;
   setInterval(function() { myState.draw(); }, myState.interval);
 }
 
-function Shape(state, x, y, w, h, fill) {
-  // This is a very simple and unsafe constructor. All we're doing is checking if the values exist.
-  // "x || 0" just means "if there is a value for x, use that. Otherwise use 0."
-  // But we aren't checking anything else! We could put "Lalala" for the value of x 
-  this.state = state;
-  this.x = x || 0;
-  this.y = y || 0;
-  this.w = w || 1;
-  this.h = h || 1;
-  this.fill = fill || '#AAAAAA';
-}
-
-// Draws this shape to a given context
-Shape.prototype.draw = function(ctx, optionalColor) {
-  var i, cur, half;
-  ctx.fillStyle = this.fill;
-  ctx.fillRect(this.x, this.y, this.w, this.h);
-  //x
-  ctx.beginPath();
-  ctx.moveTo(0, this.y - 5);
-  ctx.lineTo(0, this.y + 5);
-  ctx.moveTo(0, this.y);
-  ctx.lineTo(this.x, this.y);
-  //y
-  ctx.lineTo(this.x, 0);
-  ctx.moveTo(this.x - 5, 0);
-  ctx.lineTo(this.x + 5, 0);
-
-  ctx.moveTo(this.x + this.w/2, this.y);
-  ctx.lineTo(this.x + this.w/2, this.y + this.h);
-
-  ctx.moveTo(this.x, this.y + this.h/2);
-  ctx.lineTo(this.x + this.w, this.y + this.h/2);
-
-  if (this.state.selection === this) {
-    ctx.strokeStyle = this.state.selectionColorLine;
-    ctx.stroke();
-    ctx.strokeStyle = this.state.selectionColor;
-    ctx.lineWidth = this.state.selectionWidth;
-    ctx.strokeRect(this.x,this.y,this.w,this.h);
-    
-    // draw the boxes
-    half = this.state.selectionBoxSize / 2;
-    
-    // 0  1  2
-    // 3     4
-    // 5  6  7
-    
-    // top left, middle, right
-    this.state.selectionHandles[0].x = this.x-half;
-    this.state.selectionHandles[0].y = this.y-half;
-    
-    this.state.selectionHandles[1].x = this.x+this.w/2-half;
-    this.state.selectionHandles[1].y = this.y-half;
-    
-    this.state.selectionHandles[2].x = this.x+this.w-half;
-    this.state.selectionHandles[2].y = this.y-half;
-    
-    //middle left
-    this.state.selectionHandles[3].x = this.x-half;
-    this.state.selectionHandles[3].y = this.y+this.h/2-half;
-    
-    //middle right
-    this.state.selectionHandles[4].x = this.x+this.w-half;
-    this.state.selectionHandles[4].y = this.y+this.h/2-half;
-    
-    //bottom left, middle, right
-    this.state.selectionHandles[6].x = this.x+this.w/2-half;
-    this.state.selectionHandles[6].y = this.y+this.h-half;
-    
-    this.state.selectionHandles[5].x = this.x-half;
-    this.state.selectionHandles[5].y = this.y+this.h-half;
-    
-    this.state.selectionHandles[7].x = this.x+this.w-half;
-    this.state.selectionHandles[7].y = this.y+this.h-half;
-
-    
-    ctx.fillStyle = this.state.selectionBoxColor;
-    for (i = 0; i < 8; i += 1) {
-      cur = this.state.selectionHandles[i];
-      ctx.fillRect(cur.x, cur.y, this.state.selectionBoxSize, this.state.selectionBoxSize);
-    }
-  }
-};
-
-// Determine if a point is inside the shape's bounds
-Shape.prototype.contains = function(mx, my) {
-  // All we have to do is make sure the Mouse X,Y fall in the area between
-  // the shape's X and (X + Width) and its Y and (Y + Height)
-  return  (this.x <= mx) && (this.x + this.w >= mx) &&
-          (this.y <= my) && (this.y + this.h >= my);
-}
 
 CanvasState.prototype.addShape = function(shape) {
   this.shapes.push(shape);
@@ -474,14 +522,20 @@ CanvasState.prototype.draw = function() {
     var codeContent = '';
     for (var i = 0; i < l; i++) {
       var shape = shapes[i];
-      myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h];
+      if(myShapes[i].type == 'rect'){
+        myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h];
+      }
+      else if(myShapes[i].type == 'triangle'){
+        myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].x2, shapes[i].y2, 
+        shapes[i].x3, shapes[i].y3];
+      }
       // go over each shape, create each code line
       codeContent += "\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");" + "\n";
       // We can skip the drawing of elements that have moved off the screen:
-      if (shape.x <= this.width && shape.y <= this.height &&
-          shape.x + shape.w >= 0 && shape.y + shape.h >= 0){
-        shapes[i].draw(ctx);
-    }
+      // if (shape.x <= this.width && shape.y <= this.height &&
+      //     shape.x + shape.w >= 0 && shape.y + shape.h >= 0){
+      shapes[i].draw(ctx); //draw every shape *****
+    // }
     //wrap all lines
     var content = codeContent;
     // codeBlock.style.visibility = 'hidden';
@@ -490,17 +544,11 @@ CanvasState.prototype.draw = function() {
     //hide "<script>"
     editor.markText({line:0,ch:0},{line:0,ch:8},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
     // //hide "</script>"
-    // editor.markText({line:13,ch:1},{line:13,ch:9},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
+    editor.markText({line:13,ch:1},{line:13,ch:9},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
   }
     
-    // draw selection
-    // right now this is just a stroke along the edge of the selected Shape
-    if (this.selection != null) {
-      ctx.strokeStyle = this.selectionColor;
-      ctx.lineWidth = this.selectionWidth;
-      mySel = this.selection;
-      ctx.strokeRect(mySel.x,mySel.y,mySel.w,mySel.h);
-      //if selected highlight the according code
+    //if selected highlight the according code
+    if (this.selection != null) {  
       var lineNumber = 4+selNumber;
       editor.markText({line:lineNumber,ch:0},{line:lineNumber+1,ch:0},{className:"styled-background"});
     }
