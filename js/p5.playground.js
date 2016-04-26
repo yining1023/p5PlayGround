@@ -1,11 +1,13 @@
 var myShapes = [];
 var selNumber;
+//triangle's center point
 var distance = [];
 var obj0, obj1, obj2;
-var centerX, centerY;//triangle's center point
+var centerX, centerY;
+//bezier's center point
 var distanceB = [];
 var objB0, objB1, objB2, objB3;
-var centerBX, centerBY;//bezier's center point
+var centerBX, centerBY;
 var addState = 'addRect';
 /*
 if (document.readyState === 'complete') {
@@ -30,6 +32,10 @@ function addTriangle(){
 
 function addBezier(){
   addState = 'addBezier';
+}
+
+function addEllipse(){
+  addState = 'addEllipse';
 }
 
 var content0 = "\
@@ -69,6 +75,7 @@ function modifyp5() {
   var p5triangle = window.triangle;
   var p5rect = window.rect;
   var p5bezier = window.bezier;
+  var p5ellipse = window.ellipse;
 
   window.triangle = function(x1, y1, x2, y2, x3, y3) {
     console.log('drawing a p5 triangle',arguments);
@@ -90,6 +97,17 @@ function modifyp5() {
       coordinates: coordinates
     })
     p5rect.apply(window.p5, arguments);
+  }
+
+  window.ellipse = function(x, y, w, h) {
+    console.log('drawing a p5 ellipse',arguments);
+
+    var coordinates = [x, y, w, h];
+    myShapes.push({
+      type: 'ellipse',
+      coordinates: coordinates
+    })
+    p5ellipse.apply(window.p5, arguments);
   }
 
   window.bezier = function(x, y, x2, y2, x3, y3, x4, y4) {
@@ -131,6 +149,9 @@ function startP5() {
         myShapes[i].coordinates[2],myShapes[i].coordinates[3],
         myShapes[i].coordinates[4],myShapes[i].coordinates[5],
         myShapes[i].coordinates[6],myShapes[i].coordinates[7],'rgba(0,125,255,0.6)'));
+      }else if(myShapes[i].type == 'ellipse'){
+        s.addShape(new Ellipse(s, myShapes[i].coordinates[0],myShapes[i].coordinates[1],
+        myShapes[i].coordinates[2],myShapes[i].coordinates[3],'rgba(0,125,255,0.6)')); // The default color is blue
       }     
       //go over each shape and create new lines
       codeContent += "\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");"+"\n";
@@ -241,6 +262,12 @@ function CanvasState(canvas){
           myState.dragoffy = my - mySel.y;
         }
         //END OF RECTANGLE
+        //ELLIPSE
+        else if(mySel.type === 'ELLIPSE'){
+          myState.dragoffx = mx - mySel.x;
+          myState.dragoffy = my - mySel.y;
+        }
+        //END OF ELLIPSE
         //TRIANGLE
         else if(mySel.type === 'TRIANGLE'){
           centerX = (mySel.x+mySel.x2+mySel.x3)/3;
@@ -318,6 +345,11 @@ function CanvasState(canvas){
         myState.selection.x = mouse.x - myState.dragoffx;
         myState.selection.y = mouse.y - myState.dragoffy;
       }
+      //ELLIPSE
+      else if(myState.selection.type === 'ELLIPSE'){
+        myState.selection.x = mouse.x - myState.dragoffx;
+        myState.selection.y = mouse.y - myState.dragoffy;
+      }
       //TRIANGLE
       else if(myState.selection.type === 'TRIANGLE'){
         centerX = mouse.x - myState.dragoffx;
@@ -390,6 +422,35 @@ function CanvasState(canvas){
             case 7:
               myState.selection.w = mx - oldx;
               myState.selection.h = my - oldy;
+              break;
+          }
+        }
+        else if(myState.selection.type === 'ELLIPSE'){
+        //ELLIPSE
+          oldx = myState.selection.x;
+          oldy = myState.selection.y;
+          oldh = myState.selection.h;
+          oldw = myState.selection.w;
+          
+          //    1   
+          // 2  0  3
+          //    4   
+          switch (myState.expectResize) {
+            case 0:
+              myState.selection.x = mx;
+              myState.selection.y = my;
+              break;
+            case 1:
+              myState.selection.h = oldh/2 + (oldy - my)/2; //can only change height 
+              break;
+            case 2:
+              myState.selection.w += oldx - mx; // can only change width
+              break;
+            case 3:
+              myState.selection.w = mx - oldx; // can only change width
+              break;
+            case 4:
+              myState.selection.h = my - oldy; //can only change height
               break;
           }
         }
@@ -582,6 +643,43 @@ function CanvasState(canvas){
           }       
         }
       }
+      //ELLIPSE
+      else if(myState.selection.type === 'ELLIPSE'){
+        for (i = 0; i < 5; i += 1) {
+          //    1   
+          // 2  0  3
+          //    4 
+          cur = myState.selectionHandles[i];
+          
+          // we dont need to use the ghost context because
+          // selection handles will always be rectangles
+          if (mx >= cur.x && mx <= cur.x + myState.selectionBoxSize &&
+              my >= cur.y && my <= cur.y + myState.selectionBoxSize) {
+            // we found one!
+            myState.expectResize = i;
+            myState.valid = false;
+            
+            switch (i) {
+              case 0:
+                this.style.cursor='nwse-resize';
+                break;
+              case 1:
+                this.style.cursor='n-resize';
+                break;              
+              case 2:
+                this.style.cursor='w-resize';
+                break;
+              case 3:
+                this.style.cursor='e-resize';
+                break;
+              case 4:
+                this.style.cursor='s-resize';
+                break;
+            }
+            return;
+          }       
+        }
+      }
       // not over a selection box, return to normal
       myState.resizeDragging = false;
       myState.expectResize = -1;
@@ -634,6 +732,19 @@ function CanvasState(canvas){
       var newCoordinates = [mouse.x - 20, mouse.y - 20, 40, 60];
       myShapes.push({
         type: 'rect',
+        coordinates: newCoordinates
+      });
+    }
+    //add new ellipse
+    else if(addState === 'addEllipse'){
+      console.log('adding a ellipse');
+      var ellipse = new Ellipse(myState, mouse.x, mouse.y, 60, 40, 'rgba(0,125,255,.6)');
+
+      myState.addShape(ellipse);
+      //push new x, y, w, h to myShapes[]
+      var newCoordinates = [mouse.x, mouse.y, 60, 40];
+      myShapes.push({
+        type: 'ellipse',
         coordinates: newCoordinates
       });
     }
@@ -712,6 +823,9 @@ CanvasState.prototype.draw = function() {
       else if(myShapes[i].type === 'bezier'){
         myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].x2, shapes[i].y2, 
         shapes[i].x3, shapes[i].y3, shapes[i].x4, shapes[i].y4];
+      }
+      else if(myShapes[i].type === 'ellipse'){
+        myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h];
       }
       // go over each shape, create each code line
       codeContent += "\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");" + "\n";

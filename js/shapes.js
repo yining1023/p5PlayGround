@@ -122,6 +122,97 @@ Rect.prototype.draw = function() {
   Shape.prototype.draw.apply(this, arguments);
 }
 
+// **** ELLIPSE **** //
+function Ellipse(state, x, y, w, h, fill){
+  this.state = state;
+  this.x = x || 0;
+  this.y = y || 0;
+  this.w = w || 1;
+  this.h = h || 1;
+  this.fill = fill || '#AAAAAA';
+
+  this.type = 'ELLIPSE';
+}
+
+Ellipse.prototype.contains = function(mx, my){
+  var dx = mx-this.x;
+  var dy = my-this.y;
+  return (dx*dx)/(this.w*this.w)+(dy*dy)/(this.h*this.h)<=1;
+}
+
+Ellipse.prototype.draw = function(ctx, optionalColor){
+  var i, cur, half;
+
+  ctx.fillStyle = this.fill;
+
+  ctx.beginPath();
+  ctx.ellipse(this.x, this.y, this.w, this.h, 0, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.closePath();
+
+  //draw some lines to help align
+  //x axis: from 0 to y 
+  ctx.beginPath();
+  ctx.moveTo(0, this.y - 5);
+  ctx.lineTo(0, this.y + 5);
+  ctx.moveTo(0, this.y);
+  ctx.lineTo(this.x, this.y);
+  //y axis from 0 to x
+  ctx.lineTo(this.x, 0);
+  ctx.moveTo(this.x - 5, 0);
+  ctx.lineTo(this.x + 5, 0);
+  //h
+  ctx.moveTo(this.x - this.w, this.y);
+  ctx.lineTo(this.x + this.w, this.y);
+  //w
+  ctx.moveTo(this.x, this.y - this.h);
+  ctx.lineTo(this.x, this.y + this.h);
+  
+
+  if (this.state.selection === this) {
+    //draw the align lines
+    ctx.strokeStyle = this.state.selectionColorLine;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.strokeStyle = this.state.selectionColor;
+    ctx.lineWidth = this.state.selectionWidth;
+    //draw the outline of the rect
+    ctx.beginPath();
+    ctx.ellipse(this.x,this.y,this.w,this.h, 0, 0, 2 * Math.PI);
+    ctx.stroke();
+    
+    // draw the boxes
+    half = this.state.selectionBoxSize / 2;
+    
+    //    1   
+    // 2  0  3
+    //    4   
+
+    this.state.selectionHandles[0].x = this.x-half;
+    this.state.selectionHandles[0].y = this.y-half;
+    
+    this.state.selectionHandles[1].x = this.x-half;
+    this.state.selectionHandles[1].y = this.y-this.h-half;
+    
+    this.state.selectionHandles[2].x = this.x-this.w-half;
+    this.state.selectionHandles[2].y = this.y-half;
+
+    this.state.selectionHandles[3].x = this.x+this.w-half;
+    this.state.selectionHandles[3].y = this.y-half;
+    
+    this.state.selectionHandles[4].x = this.x-half;
+    this.state.selectionHandles[4].y = this.y+this.h-half;
+    
+    ctx.fillStyle = this.state.selectionBoxColor;
+    for (i = 0; i < 5; i += 1) {
+      cur = this.state.selectionHandles[i];
+      ctx.fillRect(cur.x, cur.y, this.state.selectionBoxSize, this.state.selectionBoxSize);
+    }
+  }
+}
+
 // **** BEZIER ***** //
 function Bezier(state, x, y, x2, y2, x3, y3, x4, y4, fill){
   this.state = state;
