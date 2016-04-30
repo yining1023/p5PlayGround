@@ -46,10 +46,10 @@ iframe {
 .toggle-on.btn {
   background-color:#4ca3ec;
   color: #fff;
-  border-color: #2490ec;
+  border-color: #007dff;
 }
 .btn-info{
-  border-color: #2490ec;
+  border-color: #007dff;
 }
 .btn-default.active:hover{
   background-color:#ec245e;
@@ -57,15 +57,15 @@ iframe {
   border-color: #ec245e;
 }
 .btn-info:hover{
-  background-color:#2490ec;
+  background-color:#007dff;
   color: #fff;
-  border-color: #2490ec;
+  border-color: #007dff;
 }
 .pink{
   color: #ec245e;
 }
 .blue{
-  color: #2490ec;
+  color: #007dff;
 }
 .red{
   background-color: #005ba8;

@@ -9,6 +9,10 @@ var distanceB = [];
 var objB0, objB1, objB2, objB3;
 var centerBX, centerBY;
 var addState = 'addRect';
+var fillColor = {r:0, g:125, b:255};
+var fillColorStr = 'rgb(0,125,255)';
+var strokeColor = {r:255, g:0, b:0};
+var strokeColorStr = 'rgb(255,0,0)';
 /*
 if (document.readyState === 'complete') {
   pauseP5();
@@ -40,9 +44,7 @@ function addEllipse(){
 
 var content0 = "\
 <script>function shapes() {\n\
-  createCanvas(650, 600);\n\
-  stroke('rgba(0,125,255,0.6)');\n\
-  fill('rgba(0,125,255,0.6)');\n";
+  createCanvas(650, 600);\n";
 
 var content2="\
 }";
@@ -76,6 +78,8 @@ function modifyp5() {
   var p5rect = window.rect;
   var p5bezier = window.bezier;
   var p5ellipse = window.ellipse;
+  var p5fill = window.fill;
+  var p5stroke = window.stroke;
 
   window.triangle = function(x1, y1, x2, y2, x3, y3) {
     console.log('drawing a p5 triangle',arguments);
@@ -120,6 +124,28 @@ function modifyp5() {
     })
     p5bezier.apply(window.p5, arguments);
   }
+
+  window.fill = function(r, g, b) {
+    console.log('drawing a p5 fill',arguments);
+
+    var coordinates = [r, g, b];
+    myShapes.push({
+      type: 'fill',
+      coordinates: coordinates
+    })
+    p5fill.apply(window.p5, arguments);
+  }
+
+  window.stroke = function(r, g, b) {
+    console.log('drawing a p5 stroke',arguments);
+
+    var coordinates = [r, g, b];
+    myShapes.push({
+      type: 'stroke',
+      coordinates: coordinates
+    })
+    p5stroke.apply(window.p5, arguments);
+  }
 }
 
 function startP5() {
@@ -139,27 +165,43 @@ function startP5() {
       //add shapes according to myShapes[]
       if(myShapes[i].type == 'rect'){
         s.addShape(new Shape(s, myShapes[i].coordinates[0],myShapes[i].coordinates[1],
-        myShapes[i].coordinates[2],myShapes[i].coordinates[3],'rgba(0,125,255,0.6)')); // The default color is blue
+        myShapes[i].coordinates[2],myShapes[i].coordinates[3],fillColorStr,strokeColorStr)); // The default color is blue
       }else if(myShapes[i].type == 'triangle'){
         s.addShape(new Triangle(s, myShapes[i].coordinates[0],myShapes[i].coordinates[1],
         myShapes[i].coordinates[2],myShapes[i].coordinates[3],
-        myShapes[i].coordinates[4],myShapes[i].coordinates[5],'rgba(0,125,255,0.6)'));
+        myShapes[i].coordinates[4],myShapes[i].coordinates[5],fillColorStr,strokeColorStr));
       }else if(myShapes[i].type == 'bezier'){
         s.addShape(new Bezier(s, myShapes[i].coordinates[0],myShapes[i].coordinates[1],
         myShapes[i].coordinates[2],myShapes[i].coordinates[3],
         myShapes[i].coordinates[4],myShapes[i].coordinates[5],
-        myShapes[i].coordinates[6],myShapes[i].coordinates[7],'rgba(0,125,255,0.6)'));
+        myShapes[i].coordinates[6],myShapes[i].coordinates[7],fillColorStr,strokeColorStr));
       }else if(myShapes[i].type == 'ellipse'){
         s.addShape(new Ellipse(s, myShapes[i].coordinates[0],myShapes[i].coordinates[1],
-        myShapes[i].coordinates[2],myShapes[i].coordinates[3],'rgba(0,125,255,0.6)')); // The default color is blue
+        myShapes[i].coordinates[2],myShapes[i].coordinates[3],fillColorStr,strokeColorStr)); // The default color is blue
+      }
+      else if(myShapes[i].type == 'fill'){
+        s.addShape(new Fill(myShapes[i].coordinates[0],myShapes[i].coordinates[1],
+        myShapes[i].coordinates[2]));
+        fillColor.r = myShapes[i].coordinates[0];
+        fillColor.g = myShapes[i].coordinates[1];
+        fillColor.b = myShapes[i].coordinates[2];
+        fillColorStr = 'rgb('+fillColor.r+','+fillColor.g+','+fillColor.b+')';
+      }
+      else if(myShapes[i].type == 'stroke'){
+        s.addShape(new Stroke(myShapes[i].coordinates[0],myShapes[i].coordinates[1],
+        myShapes[i].coordinates[2]));
+        strokeColor.r = myShapes[i].coordinates[0];
+        strokeColor.g = myShapes[i].coordinates[1];
+        strokeColor.b = myShapes[i].coordinates[2];
+        strokeColorStr = 'rgb('+strokeColor.r+','+strokeColor.g+','+strokeColor.b+')';
       }     
       //go over each shape and create new lines
-      codeContent += "\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");"+"\n";
+      // codeContent += "\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");"+"\n";
     }
     //wrap all lines
-    var content = codeContent;
+    // var content = codeContent;
     // codeBlock.style.visibility = 'hidden';
-    editor.setValue(content0+content+content2);
+    // editor.setValue(content0+content+content2);
     //hide "<script>"
     // editor.markText({line:0,ch:0},{line:0,ch:8},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
   }
@@ -214,15 +256,9 @@ function CanvasState(canvas){
   // 1     2
   
   this.selectionHandles = [];
-  // if(){
-    // debugger;
-    // for (i = 0; i < 8; i += 1) {
-    //   this.selectionHandles.push(new Rect(this));
-    // }
     for (i = 0; i < 8; i += 1) {
       this.selectionHandles.push(new Rect(this));
     }
-  // }
 
 
   // **** Then events! ****
@@ -249,78 +285,81 @@ function CanvasState(canvas){
     shapes = myState.shapes;
     l = shapes.length;
     for (var i = l-1; i >= 0; i--) {
-      if (shapes[i].contains(mx, my)) {
-        var mySel = shapes[i];
-        var selNumber0 = i;
-        selNumber = selNumber0;
-        // Keep track of where in the object we clicked
-        // so we can move it smoothly (see mousemove)
+      //if type is not fill or stroke, then it's a real shape, check if mouse is on the shape
+      if(shapes[i].type!=='FILL' && shapes[i].type!=='STROKE'){
+        if (shapes[i].contains(mx, my)) {
+          var mySel = shapes[i];
+          var selNumber0 = i;
+          selNumber = selNumber0;
+          // Keep track of where in the object we clicked
+          // so we can move it smoothly (see mousemove)
 
-        //RECTANGLE
-        if(mySel.type === 'RECTANGLE'){
-          myState.dragoffx = mx - mySel.x;
-          myState.dragoffy = my - mySel.y;
-        }
-        //END OF RECTANGLE
-        //ELLIPSE
-        else if(mySel.type === 'ELLIPSE'){
-          myState.dragoffx = mx - mySel.x;
-          myState.dragoffy = my - mySel.y;
-        }
-        //END OF ELLIPSE
-        //TRIANGLE
-        else if(mySel.type === 'TRIANGLE'){
-          centerX = (mySel.x+mySel.x2+mySel.x3)/3;
-          centerY = (mySel.y+mySel.y2+mySel.y3)/3;
-
-          //save the distance between Center and (x, y); Center and (x2, y2); Center and (x3, y3);
-          obj0 = {x: centerX - mySel.x, y: centerY - mySel.y};
-          obj1 = {x: centerX - mySel.x2, y: centerY - mySel.y2};
-          obj2 = {x: centerX - mySel.x3, y: centerY - mySel.y3};
-          //if the distance is [], push three obj in, if there's already three objs in it, update them
-          if(distance.length == 3){
-            distance[0] = obj0;
-            distance[1] = obj1;
-            distance[2] = obj2;
-          }else{
-            distance.push(obj0);
-            distance.push(obj1);
-            distance.push(obj2);
+          //RECTANGLE
+          if(mySel.type === 'RECTANGLE'){
+            myState.dragoffx = mx - mySel.x;
+            myState.dragoffy = my - mySel.y;
           }
-          myState.dragoffx = mx - centerX;
-          myState.dragoffy = my - centerY;
-        }
-        //END OF TRIANGLE
-        //BEZIER
-        else if(mySel.type === 'BEZIER'){
-          centerBX = (mySel.x+mySel.x2+mySel.x3+mySel.x4)/4;
-          centerBY = (mySel.y+mySel.y2+mySel.y3+mySel.y4)/4;
-
-          //save the distance between Center and (x, y); Center and (x2, y2); Center and (x3, y3);
-          objB0 = {x: centerBX - mySel.x, y: centerBY - mySel.y};
-          objB1 = {x: centerBX - mySel.x2, y: centerBY - mySel.y2};
-          objB2 = {x: centerBX - mySel.x3, y: centerBY - mySel.y3};
-          objB3 = {x: centerBX - mySel.x4, y: centerBY - mySel.y4};
-          //if the distance is [], push three obj in, if there's already three objs in it, update them
-          if(distanceB.length == 4){
-            distanceB[0] = objB0;
-            distanceB[1] = objB1;
-            distanceB[2] = objB2;
-            distanceB[3] = objB3;
-          }else{
-            distanceB.push(objB0);
-            distanceB.push(objB1);
-            distanceB.push(objB2);
-            distanceB.push(objB3);
+          //END OF RECTANGLE
+          //ELLIPSE
+          else if(mySel.type === 'ELLIPSE'){
+            myState.dragoffx = mx - mySel.x;
+            myState.dragoffy = my - mySel.y;
           }
-          myState.dragoffx = mx - centerBX;
-          myState.dragoffy = my - centerBY;
+          //END OF ELLIPSE
+          //TRIANGLE
+          else if(mySel.type === 'TRIANGLE'){
+            centerX = (mySel.x+mySel.x2+mySel.x3)/3;
+            centerY = (mySel.y+mySel.y2+mySel.y3)/3;
+
+            //save the distance between Center and (x, y); Center and (x2, y2); Center and (x3, y3);
+            obj0 = {x: centerX - mySel.x, y: centerY - mySel.y};
+            obj1 = {x: centerX - mySel.x2, y: centerY - mySel.y2};
+            obj2 = {x: centerX - mySel.x3, y: centerY - mySel.y3};
+            //if the distance is [], push three obj in, if there's already three objs in it, update them
+            if(distance.length == 3){
+              distance[0] = obj0;
+              distance[1] = obj1;
+              distance[2] = obj2;
+            }else{
+              distance.push(obj0);
+              distance.push(obj1);
+              distance.push(obj2);
+            }
+            myState.dragoffx = mx - centerX;
+            myState.dragoffy = my - centerY;
+          }
+          //END OF TRIANGLE
+          //BEZIER
+          else if(mySel.type === 'BEZIER'){
+            centerBX = (mySel.x+mySel.x2+mySel.x3+mySel.x4)/4;
+            centerBY = (mySel.y+mySel.y2+mySel.y3+mySel.y4)/4;
+
+            //save the distance between Center and (x, y); Center and (x2, y2); Center and (x3, y3);
+            objB0 = {x: centerBX - mySel.x, y: centerBY - mySel.y};
+            objB1 = {x: centerBX - mySel.x2, y: centerBY - mySel.y2};
+            objB2 = {x: centerBX - mySel.x3, y: centerBY - mySel.y3};
+            objB3 = {x: centerBX - mySel.x4, y: centerBY - mySel.y4};
+            //if the distance is [], push three obj in, if there's already three objs in it, update them
+            if(distanceB.length == 4){
+              distanceB[0] = objB0;
+              distanceB[1] = objB1;
+              distanceB[2] = objB2;
+              distanceB[3] = objB3;
+            }else{
+              distanceB.push(objB0);
+              distanceB.push(objB1);
+              distanceB.push(objB2);
+              distanceB.push(objB3);
+            }
+            myState.dragoffx = mx - centerBX;
+            myState.dragoffy = my - centerBY;
+          }
+          //END OF  BEIZIER
+          myState.dragging = true;
+          myState.selection = mySel;
+          myState.valid = false;
+          return;
         }
-        //END OF  BEIZIER
-        myState.dragging = true;
-        myState.selection = mySel;
-        myState.valid = false;
-        return;
       }
     }
     // havent returned means we have failed to select anything.
@@ -710,7 +749,7 @@ function CanvasState(canvas){
       console.log('adding a triangle');
 
       var triangle = new Triangle(myState, mouse.x, mouse.y - 40, mouse.x - 20*Math.sqrt(3), 
-        mouse.y + 20, mouse.x + 20*Math.sqrt(3), mouse.y + 20, 'rgba(0,125,255,.6)');
+        mouse.y + 20, mouse.x + 20*Math.sqrt(3), mouse.y + 20, fillColorStr);
 
       myState.addShape(triangle);
       //push new x, y, x2, y2, x3, y3 to myShapes[]
@@ -725,7 +764,7 @@ function CanvasState(canvas){
     //add new rect, 40, 40
     else if(addState === 'addRect'){
       console.log('adding a rect');
-      var rect = new Shape(myState, mouse.x - 20, mouse.y - 20, 40, 60, 'rgba(0,125,255,.6)');
+      var rect = new Shape(myState, mouse.x - 20, mouse.y - 20, 40, 60, fillColorStr);
 
       myState.addShape(rect);
       //push new x, y, w, h to myShapes[]
@@ -738,7 +777,7 @@ function CanvasState(canvas){
     //add new ellipse
     else if(addState === 'addEllipse'){
       console.log('adding a ellipse');
-      var ellipse = new Ellipse(myState, mouse.x, mouse.y, 60, 40, 'rgba(0,125,255,.6)');
+      var ellipse = new Ellipse(myState, mouse.x, mouse.y, 60, 40, fillColorStr);
 
       myState.addShape(ellipse);
       //push new x, y, w, h to myShapes[]
@@ -752,7 +791,7 @@ function CanvasState(canvas){
     else if(addState === 'addBezier'){
       console.log('adding a bezier');
       var bezier = new Bezier(myState, mouse.x, mouse.y, mouse.x - 75, mouse.y - 10, 
-        mouse.x + 5, mouse.y + 70, mouse.x - 70, mouse.y + 60, 'rgba(0,125,255,.6)');
+        mouse.x + 5, mouse.y + 70, mouse.x - 70, mouse.y + 60, fillColorStr);
 
       myState.addShape(bezier);
       //push new x, y, x2, y2, x3, y3, x4, y4 to myShapes[]
@@ -815,39 +854,44 @@ CanvasState.prototype.draw = function() {
       var shape = shapes[i];
       if(myShapes[i].type === 'rect'){
         myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h];
+        shapes[i].draw(ctx, fillColorStr, strokeColorStr);
       }
       else if(myShapes[i].type === 'triangle'){
         myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].x2, shapes[i].y2, 
         shapes[i].x3, shapes[i].y3];
+        shapes[i].draw(ctx, fillColorStr, strokeColorStr);
       }
       else if(myShapes[i].type === 'bezier'){
         myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].x2, shapes[i].y2, 
         shapes[i].x3, shapes[i].y3, shapes[i].x4, shapes[i].y4];
+        shapes[i].draw(ctx, fillColorStr, strokeColorStr);
       }
       else if(myShapes[i].type === 'ellipse'){
         myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h];
+        shapes[i].draw(ctx, fillColorStr, strokeColorStr);
       }
+      else if(myShapes[i].type === 'fill'){
+        myShapes[i].coordinates = [shapes[i].r, shapes[i].g, shapes[i].b];
+      }
+      else if(myShapes[i].type === 'stroke'){
+        myShapes[i].coordinates = [shapes[i].r, shapes[i].g, shapes[i].b];
+      }
+      // shapes[i].draw(ctx);   
       // go over each shape, create each code line
       codeContent += "\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");" + "\n";
-      // We can skip the drawing of elements that have moved off the screen:
-      // if (shape.x <= this.width && shape.y <= this.height &&
-      //     shape.x + shape.w >= 0 && shape.y + shape.h >= 0){
-      shapes[i].draw(ctx); //draw every shape *****
-    // }
+    }
+
     //wrap all lines
     var content = codeContent;
-    // codeBlock.style.visibility = 'hidden';
-    //because of this line, it changes edit every second, slow down the program
     editor.setValue(content0+content+content2);
     //hide "<script>"
     editor.markText({line:0,ch:0},{line:0,ch:8},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
     // //hide "</script>"
     editor.markText({line:13,ch:1},{line:13,ch:9},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
-  }
     
     //if selected highlight the according code
     if (this.selection != null) {  
-      var lineNumber = 4+selNumber;
+      var lineNumber = 2+selNumber;
       editor.markText({line:lineNumber,ch:0},{line:lineNumber+1,ch:0},{className:"styled-background"});
     }
     

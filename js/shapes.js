@@ -8,7 +8,7 @@ example:
 */
 
 //for shapes that only needs x,y,w,h --> rect, ellipse
-function Shape(state, x, y, w, h, fill) {
+function Shape(state, x, y, w, h, fill, stroke) {
   // This is a very simple and unsafe constructor. All we're doing is checking if the values exist.
   // "x || 0" just means "if there is a value for x, use that. Otherwise use 0."
   // But we aren't checking anything else! We could put "Lalala" for the value of x 
@@ -18,16 +18,20 @@ function Shape(state, x, y, w, h, fill) {
   this.w = w || 1;
   this.h = h || 1;
   this.fill = fill || '#AAAAAA';
+  this.stroke = stroke || '#000000';
 
   this.type = 'RECTANGLE';
 }
 
 // Draws this shape to a given context
-Shape.prototype.draw = function(ctx, optionalColor) {
+Shape.prototype.draw = function(ctx, optionalColor, ColorStroke) {
   var i, cur, half;
   ctx.fillStyle = this.fill;
+  ctx.strokeStyle = this.stroke;
+  ctx.lineWidth = 4;
   //draw a rect
   ctx.fillRect(this.x, this.y, this.w, this.h);
+  ctx.strokeRect(this.x, this.y, this.w, this.h);
   //draw some lines to help align
   //x axis: from 0 to x 
   ctx.beginPath();
@@ -122,8 +126,25 @@ Rect.prototype.draw = function() {
   Shape.prototype.draw.apply(this, arguments);
 }
 
+// **** FILL **** //
+function Fill(r, g, b){
+  this.r = r || 0;
+  this.g = g || 0;
+  this.b = b || 0;
+
+  this.type = 'FILL';
+}
+// **** STROKE **** //
+function Stroke(r, g, b){
+  this.r = r || 0;
+  this.g = g || 0;
+  this.b = b || 0;
+
+  this.type = 'STROKE';
+}
+
 // **** ELLIPSE **** //
-function Ellipse(state, x, y, w, h, fill){
+function Ellipse(state, x, y, w, h, fill, stroke){
   this.state = state;
   this.x = x || 0;
   this.y = y || 0;
@@ -214,7 +235,7 @@ Ellipse.prototype.draw = function(ctx, optionalColor){
 }
 
 // **** BEZIER ***** //
-function Bezier(state, x, y, x2, y2, x3, y3, x4, y4, fill){
+function Bezier(state, x, y, x2, y2, x3, y3, x4, y4, fill, stroke){
   this.state = state;
   this.x = x;
   this.y = y;
@@ -305,7 +326,7 @@ Bezier.prototype.draw = function(ctx, optionalColor){
 }
 
 // *** TRIANGLE **** //
-function Triangle(state, x, y, x2, y2, x3, y3, fill) {
+function Triangle(state, x, y, x2, y2, x3, y3, fill, stroke) {
   this.state = state;
   this.x = x;
   this.y = y;
