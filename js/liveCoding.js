@@ -1,6 +1,7 @@
 // Initialize CodeMirror editor with a nice html5 canvas demo.
+var liveCoding = {};
 var delay;
-var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
+var editor = CodeMirror(document.getElementById('codeTest'), {
   mode: 'text/html',
   styleActiveLine: true,
   lineNumbers: true,
@@ -8,6 +9,16 @@ var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
   extraKeys: {
     "Tab": "indentMore"
   }
+});
+$.get('js/liveSketch.html', function(data) {
+  liveCoding.allCodeContent = data;
+  editor.setValue(data);
+  //hide unimportant HTML code
+  //hide the head of <html><body><script>
+  editor.markText({line:0,ch:0},{line:0,ch:287},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
+  //hide </script></html>
+  editor.markText({line:16,ch:1},{line:26,ch:10},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
+
 });
 
 //hide unimportant HTML code
@@ -38,10 +49,12 @@ var reloadOnce = true;
 $('input').change(function () {
   if ($('input').is(':checked')) {
     MODE = 'playground';
+    codeinLiveCoding = editor.getValue();
     replaceCanvasAndStartP5();
-  } 
+  }
   else {
     MODE = 'liveCoding';
+    codeinLiveCoding += playgroundMode.allCodeContent;
     startLiveCoding(true);
   }
 });

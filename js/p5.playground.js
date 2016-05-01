@@ -17,6 +17,11 @@ var fillColorStr = 'rgb(255,255,255)';
 var strokeColor = {r:0, g:0, b:0};
 var strokeColorStr = 'rgb(0,0,0)';
 var strokeWeightNum = 1;
+
+var playgroundMode = {
+  allCodeContent: null
+};
+
 /*
 if (document.readyState === 'complete') {
   pauseP5();
@@ -939,11 +944,16 @@ CanvasState.prototype.draw = function() {
       var lineNumber = 2+selNumber;
       editor.markText({line:lineNumber,ch:0},{line:lineNumber+1,ch:0},{className:"styled-background"});
     }
-    
+    persistCode();
     // ** Add stuff you want drawn on top all the time here **
     
     this.valid = true;
   }
+};
+
+var persistCode = function() {
+  playgroundMode.allCodeContent = editor.getValue();
+  playgroundMode.allCodeContent  = playgroundMode.allCodeContent.replace('<script>','');
 };
 
 // Creates an object with x and y defined, set to the mouse position relative to the state's canvas
