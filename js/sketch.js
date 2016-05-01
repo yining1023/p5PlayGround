@@ -1,14 +1,12 @@
 function setup() {
   createCanvas(650, 600);
-
-  strokeWeight(4);
-  rect(41,25,50,100);
-  stroke(0,0,255);
-  rect(100,25,50,100);
-  fill(0,255,0);
-  triangle(142,26,242,126,142,126);
-  bezier(353,44,278,34,358,114,283,104);
-  fill(255,0,0);
-  ellipse(456,82,39,35);
+  fill(204, 101, 192);
+  stroke(127, 63, 120);
+  // A rectangle
+  rect(40, 120, 120, 40);
+  // An ellipse
+  ellipse(240, 240, 80, 80);
+  // A triangle
+  triangle(300, 100, 320, 100, 310, 80);
 }
 function draw(){}

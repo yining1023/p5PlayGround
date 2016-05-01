@@ -8,7 +8,7 @@ example:
 */
 
 //for shapes that only needs x,y,w,h --> rect, ellipse
-function Shape(state, x, y, w, h, fill, stroke) {
+function Shape(state, x, y, w, h, fill, stroke, strokeWeight) {
   // This is a very simple and unsafe constructor. All we're doing is checking if the values exist.
   // "x || 0" just means "if there is a value for x, use that. Otherwise use 0."
   // But we aren't checking anything else! We could put "Lalala" for the value of x 
@@ -17,21 +17,25 @@ function Shape(state, x, y, w, h, fill, stroke) {
   this.y = y || 0;
   this.w = w || 1;
   this.h = h || 1;
-  this.fill = fill || '#AAAAAA';
+  this.fill = fill || '#ffffff';
   this.stroke = stroke || '#000000';
+  this.strokeWeight = strokeWeight || 1;
 
   this.type = 'RECTANGLE';
 }
 
 // Draws this shape to a given context
-Shape.prototype.draw = function(ctx, optionalColor, ColorStroke) {
+Shape.prototype.draw = function(ctx, optionalColor, colorStroke, strokeWeight) {
   var i, cur, half;
-  ctx.fillStyle = this.fill;
-  ctx.strokeStyle = this.stroke;
-  ctx.lineWidth = 4;
-  //draw a rect
-  ctx.fillRect(this.x, this.y, this.w, this.h);
-  ctx.strokeRect(this.x, this.y, this.w, this.h);
+  if(this.fill!=='none'){
+    ctx.fillStyle = this.fill;
+    ctx.fillRect(this.x, this.y, this.w, this.h);
+  }
+  if(this.stroke!=='none'){
+    ctx.strokeStyle = this.stroke;
+    ctx.lineWidth = this.strokeWeight;
+    ctx.strokeRect(this.x, this.y, this.w, this.h);
+  }
   //draw some lines to help align
   //x axis: from 0 to x 
   ctx.beginPath();
@@ -142,15 +146,31 @@ function Stroke(r, g, b){
 
   this.type = 'STROKE';
 }
+// **** STROKEWEIGHT **** //
+function StrokeWeight(w){
+  this.w = w || 1;
+
+  this.type = 'STROKEWEIGHT';
+}
+// **** NOSTROKE **** //
+function NoStroke(){
+  this.type = 'NOSTROKE';
+}
+// **** NOSTROKE **** //
+function NoFill(){
+  this.type = 'NOFILL';
+}
 
 // **** ELLIPSE **** //
-function Ellipse(state, x, y, w, h, fill, stroke){
+function Ellipse(state, x, y, w, h, fill, stroke, strokeWeight){
   this.state = state;
   this.x = x || 0;
   this.y = y || 0;
   this.w = w || 1;
   this.h = h || 1;
-  this.fill = fill || '#AAAAAA';
+  this.fill = fill || '#ffffff';
+  this.stroke = stroke || '#000000';
+  this.strokeWeight = strokeWeight || 1;
 
   this.type = 'ELLIPSE';
 }
@@ -161,15 +181,20 @@ Ellipse.prototype.contains = function(mx, my){
   return (dx*dx)/(this.w*this.w)+(dy*dy)/(this.h*this.h)<=1;
 }
 
-Ellipse.prototype.draw = function(ctx, optionalColor){
+Ellipse.prototype.draw = function(ctx, optionalColor, colorStroke, strokeWeight){
   var i, cur, half;
-
-  ctx.fillStyle = this.fill;
-
-  ctx.beginPath();
-  ctx.ellipse(this.x, this.y, this.w, this.h, 0, 0, 2 * Math.PI);
-  ctx.fill();
-  ctx.closePath();
+  if(this.fill!=='none'){
+    ctx.fillStyle = this.fill;
+    ctx.beginPath();
+    ctx.ellipse(this.x, this.y, this.w/2, this.h/2, 0, 0, 2 * Math.PI);
+    ctx.closePath();
+    ctx.fill();
+  }
+  if(this.stroke!=='none'){
+    ctx.strokeStyle = this.stroke;
+    ctx.lineWidth = this.strokeWeight;  
+    ctx.stroke();
+  }
 
   //draw some lines to help align
   //x axis: from 0 to y 
@@ -183,11 +208,11 @@ Ellipse.prototype.draw = function(ctx, optionalColor){
   ctx.moveTo(this.x - 5, 0);
   ctx.lineTo(this.x + 5, 0);
   //h
-  ctx.moveTo(this.x - this.w, this.y);
-  ctx.lineTo(this.x + this.w, this.y);
+  ctx.moveTo(this.x - this.w/2, this.y);
+  ctx.lineTo(this.x + this.w/2, this.y);
   //w
-  ctx.moveTo(this.x, this.y - this.h);
-  ctx.lineTo(this.x, this.y + this.h);
+  ctx.moveTo(this.x, this.y - this.h/2);
+  ctx.lineTo(this.x, this.y + this.h/2);
   
 
   if (this.state.selection === this) {
@@ -201,7 +226,7 @@ Ellipse.prototype.draw = function(ctx, optionalColor){
     ctx.lineWidth = this.state.selectionWidth;
     //draw the outline of the rect
     ctx.beginPath();
-    ctx.ellipse(this.x,this.y,this.w,this.h, 0, 0, 2 * Math.PI);
+    ctx.ellipse(this.x,this.y,this.w/2,this.h/2, 0, 0, 2 * Math.PI);
     ctx.stroke();
     
     // draw the boxes
@@ -215,16 +240,16 @@ Ellipse.prototype.draw = function(ctx, optionalColor){
     this.state.selectionHandles[0].y = this.y-half;
     
     this.state.selectionHandles[1].x = this.x-half;
-    this.state.selectionHandles[1].y = this.y-this.h-half;
+    this.state.selectionHandles[1].y = this.y-this.h/2-half;
     
-    this.state.selectionHandles[2].x = this.x-this.w-half;
+    this.state.selectionHandles[2].x = this.x-this.w/2-half;
     this.state.selectionHandles[2].y = this.y-half;
 
-    this.state.selectionHandles[3].x = this.x+this.w-half;
+    this.state.selectionHandles[3].x = this.x+this.w/2-half;
     this.state.selectionHandles[3].y = this.y-half;
     
     this.state.selectionHandles[4].x = this.x-half;
-    this.state.selectionHandles[4].y = this.y+this.h-half;
+    this.state.selectionHandles[4].y = this.y+this.h/2-half;
     
     ctx.fillStyle = this.state.selectionBoxColor;
     for (i = 0; i < 5; i += 1) {
@@ -235,7 +260,7 @@ Ellipse.prototype.draw = function(ctx, optionalColor){
 }
 
 // **** BEZIER ***** //
-function Bezier(state, x, y, x2, y2, x3, y3, x4, y4, fill, stroke){
+function Bezier(state, x, y, x2, y2, x3, y3, x4, y4, fill, stroke, strokeWeight){
   this.state = state;
   this.x = x;
   this.y = y;
@@ -246,7 +271,9 @@ function Bezier(state, x, y, x2, y2, x3, y3, x4, y4, fill, stroke){
   this.x4 = x4;
   this.y4 = y4;
 
-  this.fill = fill;
+  this.fill = fill || '#ffffff';
+  this.stroke = stroke || '#000000';
+  this.strokeWeight = strokeWeight || 1;
 
   this.type = 'BEZIER';
 }
@@ -260,18 +287,24 @@ Bezier.prototype.contains = function(mx, my){
   return mx <= maxX && mx >= minX && my <= maxY && my >= minY; 
 }
 
-Bezier.prototype.draw = function(ctx, optionalColor){
+Bezier.prototype.draw = function(ctx, optionalColor, colorStroke, strokeWeight){
   var i, cur, half;
 
-  ctx.fillStyle = this.fill;
-  ctx.strokeStyle = this.fill;
+  if(this.stroke=='none'){
+    this.stroke='#000000';
+  }
+    ctx.strokeStyle = this.stroke;
+    ctx.lineWidth = this.strokeWeight;
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);  
+    ctx.bezierCurveTo(this.x2, this.y2, this.x3, this.y3, this.x4, this.y4);
+    ctx.stroke();
 
-  ctx.beginPath();
-  ctx.moveTo(this.x, this.y);  
-  ctx.bezierCurveTo(this.x2, this.y2, this.x3, this.y3, this.x4, this.y4);
-  ctx.lineWidth = 4;
-  ctx.stroke();
-
+  if(this.fill!=='none'){
+    ctx.fillStyle = this.fill;
+    ctx.fill();
+  }
+  
   //draw some lines to help align
   //x axis: from 0 to x 
   ctx.beginPath();
@@ -326,7 +359,7 @@ Bezier.prototype.draw = function(ctx, optionalColor){
 }
 
 // *** TRIANGLE **** //
-function Triangle(state, x, y, x2, y2, x3, y3, fill, stroke) {
+function Triangle(state, x, y, x2, y2, x3, y3, fill, stroke, strokeWeight) {
   this.state = state;
   this.x = x;
   this.y = y;
@@ -334,7 +367,9 @@ function Triangle(state, x, y, x2, y2, x3, y3, fill, stroke) {
   this.y2 = y2;
   this.x3 = x3
   this.y3 = y3;
-  this.fill = fill;
+  this.fill = fill || '#ffffff';
+  this.stroke = stroke || '#000000';
+  this.strokeWeight = strokeWeight || 1;
 
   this.type = 'TRIANGLE';
 }
@@ -352,18 +387,23 @@ Triangle.prototype.contains = function(mx, my) {
   return c;
 }
 
-Triangle.prototype.draw = function(ctx, optionalColor) {
+Triangle.prototype.draw = function(ctx, optionalColor, colorStroke, strokeWeight) {
   var i, cur, half;
-
-  ctx.fillStyle = this.fill;
-
-  ctx.beginPath();
-  ctx.moveTo(this.x, this.y);
-  ctx.lineTo(this.x2, this.y2);
-  ctx.lineTo(this.x3, this.y3);
-  ctx.lineTo(this.x,this.y);
-  ctx.closePath();
-  ctx.fill();
+  if(this.fill!=='none'){
+    ctx.fillStyle = this.fill;
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.x2, this.y2);
+    ctx.lineTo(this.x3, this.y3);
+    ctx.lineTo(this.x,this.y);
+    ctx.closePath();
+    ctx.fill();
+  }
+  if(this.stroke!=='none'){
+    ctx.strokeStyle = this.stroke;
+    ctx.lineWidth = this.strokeWeight;
+    ctx.stroke();
+  }
 
   //draw some lines to help align
   //x axis: from 0 to x 

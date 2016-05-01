@@ -1,4 +1,5 @@
 var myShapes = [];
+//highlighted code line
 var selNumber;
 //triangle's center point
 var distance = [];
@@ -8,11 +9,14 @@ var centerX, centerY;
 var distanceB = [];
 var objB0, objB1, objB2, objB3;
 var centerBX, centerBY;
+//what shape to add
 var addState = 'addRect';
-var fillColor = {r:0, g:125, b:255};
-var fillColorStr = 'rgb(0,125,255)';
-var strokeColor = {r:255, g:0, b:0};
-var strokeColorStr = 'rgb(255,0,0)';
+//all about color
+var fillColor = {r:255, g:255, b:255};
+var fillColorStr = 'rgb(255,255,255)';
+var strokeColor = {r:0, g:0, b:0};
+var strokeColorStr = 'rgb(0,0,0)';
+var strokeWeightNum = 1;
 /*
 if (document.readyState === 'complete') {
   pauseP5();
@@ -80,6 +84,9 @@ function modifyp5() {
   var p5ellipse = window.ellipse;
   var p5fill = window.fill;
   var p5stroke = window.stroke;
+  var p5strokeWeight = window.strokeWeight;
+  var p5noFill = window.noFill;
+  var p5noStroke = window.noStroke;
 
   window.triangle = function(x1, y1, x2, y2, x3, y3) {
     console.log('drawing a p5 triangle',arguments);
@@ -126,8 +133,13 @@ function modifyp5() {
   }
 
   window.fill = function(r, g, b) {
-    console.log('drawing a p5 fill',arguments);
-
+    console.log('detecting a p5 fill',arguments);
+    if(g==null){
+      g=r;
+    }
+    if(b==null){
+      b=r;
+    }
     var coordinates = [r, g, b];
     myShapes.push({
       type: 'fill',
@@ -137,14 +149,49 @@ function modifyp5() {
   }
 
   window.stroke = function(r, g, b) {
-    console.log('drawing a p5 stroke',arguments);
-
+    console.log('detecting a p5 stroke',arguments);
+    if(g==null){
+      g=r;
+    }
+    if(b==null){
+      b=r;
+    }
     var coordinates = [r, g, b];
     myShapes.push({
       type: 'stroke',
       coordinates: coordinates
     })
     p5stroke.apply(window.p5, arguments);
+  }
+  window.strokeWeight = function(w) {
+    console.log('detecting a p5 strokeWeight',arguments);
+
+    var coordinates = [w];
+    myShapes.push({
+      type: 'strokeWeight',
+      coordinates: coordinates
+    })
+    p5strokeWeight.apply(window.p5, arguments);
+  }
+  window.noFill = function() {
+    console.log('detecting a p5 noFill');
+
+    var coordinates = [];
+    myShapes.push({
+      type: 'noFill',
+      coordinates: coordinates
+    })
+    p5noFill.apply();
+  }
+  window.noStroke = function() {
+    console.log('detecting a p5 noStroke');
+
+    var coordinates = [];
+    myShapes.push({
+      type: 'noStroke',
+      coordinates: coordinates
+    })
+    p5noStroke.apply();
   }
 }
 
@@ -165,19 +212,19 @@ function startP5() {
       //add shapes according to myShapes[]
       if(myShapes[i].type == 'rect'){
         s.addShape(new Shape(s, myShapes[i].coordinates[0],myShapes[i].coordinates[1],
-        myShapes[i].coordinates[2],myShapes[i].coordinates[3],fillColorStr,strokeColorStr)); // The default color is blue
+        myShapes[i].coordinates[2],myShapes[i].coordinates[3],fillColorStr,strokeColorStr,strokeWeightNum)); // The default color is blue
       }else if(myShapes[i].type == 'triangle'){
         s.addShape(new Triangle(s, myShapes[i].coordinates[0],myShapes[i].coordinates[1],
         myShapes[i].coordinates[2],myShapes[i].coordinates[3],
-        myShapes[i].coordinates[4],myShapes[i].coordinates[5],fillColorStr,strokeColorStr));
+        myShapes[i].coordinates[4],myShapes[i].coordinates[5],fillColorStr,strokeColorStr,strokeWeightNum));
       }else if(myShapes[i].type == 'bezier'){
         s.addShape(new Bezier(s, myShapes[i].coordinates[0],myShapes[i].coordinates[1],
         myShapes[i].coordinates[2],myShapes[i].coordinates[3],
         myShapes[i].coordinates[4],myShapes[i].coordinates[5],
-        myShapes[i].coordinates[6],myShapes[i].coordinates[7],fillColorStr,strokeColorStr));
+        myShapes[i].coordinates[6],myShapes[i].coordinates[7],fillColorStr,strokeColorStr,strokeWeightNum));
       }else if(myShapes[i].type == 'ellipse'){
         s.addShape(new Ellipse(s, myShapes[i].coordinates[0],myShapes[i].coordinates[1],
-        myShapes[i].coordinates[2],myShapes[i].coordinates[3],fillColorStr,strokeColorStr)); // The default color is blue
+        myShapes[i].coordinates[2],myShapes[i].coordinates[3],fillColorStr,strokeColorStr,strokeWeightNum)); // The default color is blue
       }
       else if(myShapes[i].type == 'fill'){
         s.addShape(new Fill(myShapes[i].coordinates[0],myShapes[i].coordinates[1],
@@ -194,16 +241,20 @@ function startP5() {
         strokeColor.g = myShapes[i].coordinates[1];
         strokeColor.b = myShapes[i].coordinates[2];
         strokeColorStr = 'rgb('+strokeColor.r+','+strokeColor.g+','+strokeColor.b+')';
-      }     
-      //go over each shape and create new lines
-      // codeContent += "\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");"+"\n";
+      }
+      else if(myShapes[i].type == 'strokeWeight'){
+        s.addShape(new StrokeWeight(myShapes[i].coordinates[0]));
+        strokeWeightNum = myShapes[i].coordinates[0];
+      }
+      else if(myShapes[i].type == 'noFill'){
+        s.addShape(new NoFill());
+        fillColorStr = 'none';
+      }
+      else if(myShapes[i].type == 'noStroke'){
+        s.addShape(new NoStroke());
+        strokeColorStr = 'none';
+      }      
     }
-    //wrap all lines
-    // var content = codeContent;
-    // codeBlock.style.visibility = 'hidden';
-    // editor.setValue(content0+content+content2);
-    //hide "<script>"
-    // editor.markText({line:0,ch:0},{line:0,ch:8},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
   }
   window.draw = window.originaldraw;
 
@@ -286,7 +337,8 @@ function CanvasState(canvas){
     l = shapes.length;
     for (var i = l-1; i >= 0; i--) {
       //if type is not fill or stroke, then it's a real shape, check if mouse is on the shape
-      if(shapes[i].type!=='FILL' && shapes[i].type!=='STROKE'){
+      if(shapes[i].type!=='FILL' && shapes[i].type!=='STROKE' && shapes[i].type!=='STROKEWEIGHT'
+        && shapes[i].type!=='NOFILL' && shapes[i].type!=='NOSTROKE'){
         if (shapes[i].contains(mx, my)) {
           var mySel = shapes[i];
           var selNumber0 = i;
@@ -749,7 +801,7 @@ function CanvasState(canvas){
       console.log('adding a triangle');
 
       var triangle = new Triangle(myState, mouse.x, mouse.y - 40, mouse.x - 20*Math.sqrt(3), 
-        mouse.y + 20, mouse.x + 20*Math.sqrt(3), mouse.y + 20, fillColorStr);
+        mouse.y + 20, mouse.x + 20*Math.sqrt(3), mouse.y + 20, fillColorStr, strokeColorStr, strokeWeightNum);
 
       myState.addShape(triangle);
       //push new x, y, x2, y2, x3, y3 to myShapes[]
@@ -764,7 +816,7 @@ function CanvasState(canvas){
     //add new rect, 40, 40
     else if(addState === 'addRect'){
       console.log('adding a rect');
-      var rect = new Shape(myState, mouse.x - 20, mouse.y - 20, 40, 60, fillColorStr);
+      var rect = new Shape(myState, mouse.x - 20, mouse.y - 20, 40, 60, fillColorStr, strokeColorStr, strokeWeightNum);
 
       myState.addShape(rect);
       //push new x, y, w, h to myShapes[]
@@ -777,7 +829,7 @@ function CanvasState(canvas){
     //add new ellipse
     else if(addState === 'addEllipse'){
       console.log('adding a ellipse');
-      var ellipse = new Ellipse(myState, mouse.x, mouse.y, 60, 40, fillColorStr);
+      var ellipse = new Ellipse(myState, mouse.x, mouse.y, 60, 40, fillColorStr, strokeColorStr, strokeWeightNum);
 
       myState.addShape(ellipse);
       //push new x, y, w, h to myShapes[]
@@ -791,7 +843,7 @@ function CanvasState(canvas){
     else if(addState === 'addBezier'){
       console.log('adding a bezier');
       var bezier = new Bezier(myState, mouse.x, mouse.y, mouse.x - 75, mouse.y - 10, 
-        mouse.x + 5, mouse.y + 70, mouse.x - 70, mouse.y + 60, fillColorStr);
+        mouse.x + 5, mouse.y + 70, mouse.x - 70, mouse.y + 60, fillColorStr, strokeColorStr, strokeWeightNum);
 
       myState.addShape(bezier);
       //push new x, y, x2, y2, x3, y3, x4, y4 to myShapes[]
@@ -854,29 +906,22 @@ CanvasState.prototype.draw = function() {
       var shape = shapes[i];
       if(myShapes[i].type === 'rect'){
         myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h];
-        shapes[i].draw(ctx, fillColorStr, strokeColorStr);
+        shapes[i].draw(ctx, fillColorStr, strokeColorStr, strokeWeightNum);
       }
       else if(myShapes[i].type === 'triangle'){
         myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].x2, shapes[i].y2, 
         shapes[i].x3, shapes[i].y3];
-        shapes[i].draw(ctx, fillColorStr, strokeColorStr);
+        shapes[i].draw(ctx, fillColorStr, strokeColorStr, strokeWeightNum);
       }
       else if(myShapes[i].type === 'bezier'){
         myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].x2, shapes[i].y2, 
         shapes[i].x3, shapes[i].y3, shapes[i].x4, shapes[i].y4];
-        shapes[i].draw(ctx, fillColorStr, strokeColorStr);
+        shapes[i].draw(ctx, fillColorStr, strokeColorStr, strokeWeightNum);
       }
       else if(myShapes[i].type === 'ellipse'){
         myShapes[i].coordinates = [shapes[i].x, shapes[i].y, shapes[i].w, shapes[i].h];
-        shapes[i].draw(ctx, fillColorStr, strokeColorStr);
-      }
-      else if(myShapes[i].type === 'fill'){
-        myShapes[i].coordinates = [shapes[i].r, shapes[i].g, shapes[i].b];
-      }
-      else if(myShapes[i].type === 'stroke'){
-        myShapes[i].coordinates = [shapes[i].r, shapes[i].g, shapes[i].b];
-      }
-      // shapes[i].draw(ctx);   
+        shapes[i].draw(ctx, fillColorStr, strokeColorStr, strokeWeightNum);
+      }  
       // go over each shape, create each code line
       codeContent += "\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");" + "\n";
     }
@@ -887,7 +932,7 @@ CanvasState.prototype.draw = function() {
     //hide "<script>"
     editor.markText({line:0,ch:0},{line:0,ch:8},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
     // //hide "</script>"
-    editor.markText({line:13,ch:1},{line:13,ch:9},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
+    // editor.markText({line:13,ch:1},{line:13,ch:9},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
     
     //if selected highlight the according code
     if (this.selection != null) {  
