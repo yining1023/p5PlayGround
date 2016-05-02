@@ -15,9 +15,9 @@ $.get('js/liveSketch.html', function(data) {
   editor.setValue(data);
   //hide unimportant HTML code
   //hide the head of <html><body><script>
-  editor.markText({line:0,ch:0},{line:0,ch:287},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
+  editor.markText({line:0,ch:0},{line:0,ch:478},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
   //hide </script></html>
-  editor.markText({line:16,ch:1},{line:26,ch:10},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
+  editor.markText({line:9,ch:0},{line:9,ch:145},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
 
 });
 
@@ -49,12 +49,11 @@ var reloadOnce = true;
 $('input').change(function () {
   if ($('input').is(':checked')) {
     MODE = 'playground';
-    codeinLiveCoding = editor.getValue();
     replaceCanvasAndStartP5();
   }
   else {
     MODE = 'liveCoding';
-    codeinLiveCoding += playgroundMode.allCodeContent;
+    liveCoding.allCodeContent += '\n' + playgroundMode.allCodeContent;
     startLiveCoding(true);
   }
 });
