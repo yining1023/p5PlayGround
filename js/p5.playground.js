@@ -53,7 +53,7 @@ function addEllipse(){
 
 var content0 = "\
 <script>function shapes() {\n\
-  createCanvas(650, 600);\n";
+    createCanvas(650, 600);\n";
 
 var content2="\
 }";
@@ -928,7 +928,7 @@ CanvasState.prototype.draw = function() {
         shapes[i].draw(ctx, fillColorStr, strokeColorStr, strokeWeightNum);
       }  
       // go over each shape, create each code line
-      codeContent += "\u00A0"+"\u00A0"+myShapes[i].type + "(" + myShapes[i].coordinates + ");" + "\n";
+      codeContent += "\t"+myShapes[i].type + "(" + myShapes[i].coordinates + ");" + "\n";
     }
 
     //wrap all lines
