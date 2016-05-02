@@ -137,13 +137,13 @@ body {
   z-index: 11;
 }
 .mousePosBox {
-  height: 16px;
-  background: rgba(0,0,0,0.25);
+  height: 24px;
+  background: rgba(236, 36, 94, 0.5);
   color: #fff;
-  font-family: source code pro;
-  font-size: 12px;
-  line-height: 16px;
-  border: 1px solid rgba(0,0,0,0.5);
+  font-family: courier;
+  font-size: 18px;
+  line-height: 18px;
+  border: 1px solid rgba(236, 36, 94,1);
   position: fixed;
   white-space: no-wrap;
   display: block;
@@ -152,5 +152,5 @@ body {
   text-align: left;
   left: -50%;
   top: -50%;
-  padding: 0 2px;
+  padding: 4 4 4 4px;
 }
