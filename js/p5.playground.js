@@ -940,7 +940,7 @@ CanvasState.prototype.draw = function() {
     
     //if selected highlight the according code
     if (this.selection != null) {  
-      var lineNumber = selNumber + 2;
+      var lineNumber = selNumber + 1;
       editor.markText({line:lineNumber,ch:0},{line:lineNumber+1,ch:0},{className:"styled-background"});
     }
     // ** Add stuff you want drawn on top all the time here **
