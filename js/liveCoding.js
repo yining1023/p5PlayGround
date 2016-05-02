@@ -4,7 +4,12 @@ var liveCoding = {
     // if the same code doesnt already exist
     if (this.allCode.indexOf(toAppend) === -1) {
       var sketchDOM = $(this.allCode);
-      var src = sketchDOM[sketchDOM.length - 1].text;
+
+      // find the <script> element with id = 'liveSketch'
+      var srcIndex = _.findIndex(sketchDOM, function(elem) {
+        return elem.id === 'liveSketch';
+      });
+      var src = sketchDOM[srcIndex].text;
       var newSrc = src + '\n' + toAppend + '\n';
 
       this.allCode = this.allCode.replace(src, newSrc);
