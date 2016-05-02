@@ -18,9 +18,7 @@ var strokeColor = {r:0, g:0, b:0};
 var strokeColorStr = 'rgb(0,0,0)';
 var strokeWeightNum = 1;
 
-var playgroundMode = {
-  allCodeContent: null
-};
+var playgroundMode = {};
 
 /*
 if (document.readyState === 'complete') {
@@ -52,8 +50,7 @@ function addEllipse(){
 }
 
 var content0 = "\
-<script>function shapes() {\n\
-    createCanvas(650, 600);\n";
+<script>function shapes() {\n";
 
 var content2="\
 }";
@@ -933,7 +930,9 @@ CanvasState.prototype.draw = function() {
 
     //wrap all lines
     var content = codeContent;
-    editor.setValue(content0+content+content2);
+    editor.setValue(content0 + content + content2);
+    persistCode(content0 + content + content2);
+
     //hide "<script>"
     editor.markText({line:0,ch:0},{line:0,ch:8},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
     // //hide "</script>"
@@ -941,19 +940,18 @@ CanvasState.prototype.draw = function() {
     
     //if selected highlight the according code
     if (this.selection != null) {  
-      var lineNumber = 2+selNumber;
+      var lineNumber = selNumber + 2;
       editor.markText({line:lineNumber,ch:0},{line:lineNumber+1,ch:0},{className:"styled-background"});
     }
-    persistCode();
     // ** Add stuff you want drawn on top all the time here **
     
     this.valid = true;
   }
 };
 
-var persistCode = function() {
-  playgroundMode.allCodeContent = editor.getValue();
-  playgroundMode.allCodeContent  = playgroundMode.allCodeContent.replace('<script>','');
+var persistCode = function(_code) {
+  playgroundMode.allCode = _code;
+  playgroundMode.allCode  = playgroundMode.allCode.replace('<script>','');
 };
 
 // Creates an object with x and y defined, set to the mouse position relative to the state's canvas

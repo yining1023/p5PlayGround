@@ -1,7 +1,21 @@
-// Initialize CodeMirror editor with a nice html5 canvas demo.
-var liveCoding = {};
+var liveCoding = {
+  allCode: null,
+  appendCode: function(toAppend) {
+    // if the same code doesnt already exist
+    if (this.allCode.indexOf(toAppend) === -1) {
+      var sketchDOM = $(this.allCode);
+      var src = sketchDOM[sketchDOM.length - 1].text;
+      var newSrc = src + '\n' + toAppend + '\n';
+
+      this.allCode = this.allCode.replace(src, newSrc);
+    }
+  }
+};
+
 var delay;
-var editor = CodeMirror(document.getElementById('codeTest'), {
+
+// Initialize CodeMirror editor with a nice html5 canvas demo.
+var editor = CodeMirror(document.getElementById('code'), {
   mode: 'text/html',
   styleActiveLine: true,
   lineNumbers: true,
@@ -10,22 +24,35 @@ var editor = CodeMirror(document.getElementById('codeTest'), {
     "Tab": "indentMore"
   }
 });
-$.get('js/liveSketch.html', function(data) {
-  liveCoding.allCodeContent = data;
-  editor.setValue(data);
-  //hide unimportant HTML code
-  //hide the head of <html><body><script>
-  editor.markText({line:0,ch:0},{line:0,ch:478},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
-  //hide </script></html>
-  editor.markText({line:9,ch:0},{line:9,ch:145},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
 
-});
+// sessionStorage.removeItem('liveSketch')
 
-//hide unimportant HTML code
-//hide the head of <html><body><script>
-editor.markText({line:0,ch:0},{line:0,ch:287},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
-//hide </script></html>
-editor.markText({line:16,ch:1},{line:26,ch:10},{collapsed: true, inclusiveLeft: true, inclusiveRight: true});
+// use window.sessionStorage now for storing code right now
+// to do: save code on server side
+if (sessionStorage.getItem('liveSketch')) {
+  liveCoding.allCode = sessionStorage.getItem('liveSketch');
+  editor.setValue(liveCoding.allCode);
+  hideHTMLFromEditor();
+} else {
+  $.get('js/liveSketch.html', function(data) {
+    sessionStorage.setItem('liveSketch', data);
+    liveCoding.allCode = data;
+    editor.setValue(data);
+    hideHTMLFromEditor();
+  });
+}
+
+function hideHTMLFromEditor() {
+  var options = {
+    collapsed: true,
+    inclusiveLeft: true,
+    inclusiveRight: true
+  };
+  // hide the head of <html><body><script>
+  editor.markText({line:0, ch: 0}, {line:0}, options); // do not specify ch for the end point so the whole line is hidden
+  // hide closing tags </script></html>
+  editor.markText({line: editor.lastLine(), ch: 0}, {line: editor.lastLine()}, options);
+}
 
 //run the code in the editor
 function updatePreview() {
@@ -53,12 +80,13 @@ $('input').change(function () {
   }
   else {
     MODE = 'liveCoding';
-    liveCoding.allCodeContent += '\n' + playgroundMode.allCodeContent;
+    liveCoding.appendCode(playgroundMode.allCode);
+    sessionStorage.setItem('liveSketch', liveCoding.allCode);
     startLiveCoding(true);
   }
 });
 
-function startLiveCoding(shouldReload){
+function startLiveCoding(shouldReload, editorValue){
   var canvas = document.getElementById('defaultCanvas0');
   if(canvas){
     console.log('replacing canvas');
@@ -67,6 +95,7 @@ function startLiveCoding(shouldReload){
   if(shouldReload){
     location.reload();
   }
+  hideHTMLFromEditor();
 }
 
 //live coding mode
