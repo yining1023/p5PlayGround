@@ -9,7 +9,7 @@ body {
   margin: 0px;
 
   padding-left: 19px;
-  padding-top: 19px;  
+  padding-top: 19px;
 }
 .ruler {
   background: rgba(255,255,255,1);
@@ -28,18 +28,18 @@ body {
   height: 18px;
   left: 0px;
   top: 0px;
-  
+
   border-bottom: 1px solid;
   z-index: 9;
 }
 .vRule {
   position: absolute;
-  
+
   min-height: 100%;
   width: 18px;
   left: 0px;
   top: 0px;
-  
+
   border-right: 1px solid;
   z-index: 9;
 
@@ -83,23 +83,23 @@ body {
 .vRule .tickLabel span {
   display: block;
   position: absolute;
-  
+
   top: 1px;
   right: 0px;
   margin-right: 18px;
-  
+
   -webkit-transform: rotate(-90deg);
   -moz-transform: rotate(-90deg);
   -ms-transform: rotate(-90deg);
   -o-transform: rotate(-90deg);
   transform: rotate(-90deg);
-  
+
   -webkit-transform-origin: top right;
   -moz-transform-origin: top right;
   -ms-transform-origin: top right;
   -o-transform-origin: top right;
   transform-origin: top right;
-  
+
 }
 .vRule .tickMajor {
   position: absolute;
@@ -119,7 +119,7 @@ body {
   position: fixed;
   width: 100%;
   height: 0px;
-  
+
   left: 0;
   background: rgba(0,0,0,0);
   border-bottom: 1px dotted;
@@ -137,7 +137,7 @@ body {
   z-index: 11;
 }
 .mousePosBox {
-  height: 24px;
+  height: 40px;
   background: rgba(236, 36, 94, 0.5);
   color: #fff;
   font-family: courier;
