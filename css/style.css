@@ -1,8 +1,8 @@
-body {padding: 0; margin: 10px;} 
+body {padding: 0; margin: 10px;}
 h1{
   font-family: courier;
 }
-canvas {vertical-align: top;} 
+canvas {vertical-align: top;}
 #defaultCanvas0 {
   visibility: hidden;
   height: 200px;
@@ -26,14 +26,14 @@ iframe {
   width: 50%;
   border: 1px solid black;
 }
-.styled-background { background-color: #ff7; 
+.styled-background { background-color: #ff7;
 }
 .toggle{
   margin-top: 15px;
-  left: 564px;
+  left: 650px;
 }
 .fast .toggle-group {
-  transition: left 0.1s; -webkit-transition: left 0.2s; 
+  transition: left 0.1s; -webkit-transition: left 0.2s;
 }
 .right{
   text-align: right;
