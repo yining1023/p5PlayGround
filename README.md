@@ -9,3 +9,5 @@ An interactive debug tool for p5.js which allows people to manipulate shapes on 
 * double click to add new shape
 
 Demo: [http://yining1023.github.io/p5PlayGround/](http://yining1023.github.io/p5PlayGround/) 
+
+More Introduction: [here](http://1023.io/p5-inspector/)
